@@ -60,6 +60,15 @@
         #notification {
             transition: transform 0.22s ease, opacity 0.22s ease;
         }
+        .asset-chip {
+            border: 1px solid #334155;
+            border-radius: 8px;
+            background: #0f172a;
+            color: #cbd5e1;
+            padding: 0.5rem 0.65rem;
+            font-size: 0.78rem;
+            line-height: 1.35;
+        }
     </style>
 </head>
 <body class="min-h-screen bg-slate-950 text-slate-100 selection:bg-cyan-400/20">
@@ -186,6 +195,35 @@
                         <label for="avoidWords" class="mb-1.5 block text-sm font-semibold text-slate-300">คำต้องห้าม / สไตล์ที่ไม่ต้องการ</label>
                         <textarea id="avoidWords" rows="2" class="field w-full resize-none px-3 py-2.5" placeholder="เช่น ห้ามเว่อร์, ไม่ใช้คำว่า ปัง/สุดคุ้ม, ไม่พูดเหมือน AI"></textarea>
                     </div>
+
+                    <div class="rounded-lg border border-slate-800 bg-slate-950/70 p-3">
+                        <div class="mb-3 flex items-center justify-between">
+                            <div>
+                                <h3 class="font-bold text-white">Reference Assets</h3>
+                                <p class="mt-1 text-xs text-slate-500">เพิ่มวัตถุดิบจริงให้ AI ใช้เป็นบริบท</p>
+                            </div>
+                            <span class="rounded-md bg-violet-400/10 px-2 py-1 text-xs font-semibold text-violet-200">Context</span>
+                        </div>
+
+                        <div class="space-y-3">
+                            <div>
+                                <label for="referenceText" class="mb-1.5 block text-sm font-semibold text-slate-300">ข้อความ / รีวิว / transcript / brief เพิ่มเติม</label>
+                                <textarea id="referenceText" rows="4" class="field w-full resize-none px-3 py-2.5" placeholder="วางข้อความจากลูกค้า รีวิว โพสต์เก่า หรือ brand guideline"></textarea>
+                            </div>
+                            <div>
+                                <label for="referenceLinks" class="mb-1.5 block text-sm font-semibold text-slate-300">ลิงก์อ้างอิง</label>
+                                <textarea id="referenceLinks" rows="2" class="field w-full resize-none px-3 py-2.5" placeholder="วาง URL ทีละบรรทัด เช่น landing page, โพสต์คู่แข่ง, moodboard"></textarea>
+                                <p class="mt-1.5 text-xs text-slate-500">ระบบจะใช้ URL เป็นบริบทใน prompt แต่ยังไม่ดึงเนื้อหาจากเว็บปลายทาง</p>
+                            </div>
+                            <div>
+                                <label for="imageInput" class="mb-1.5 block text-sm font-semibold text-slate-300">ภาพสินค้า / screenshot / moodboard</label>
+                                <input id="imageInput" type="file" accept="image/*" multiple class="field w-full px-3 py-2.5 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-cyan-300 file:px-3 file:py-1.5 file:font-semibold file:text-slate-950">
+                                <p class="mt-1.5 text-xs text-slate-500">รองรับภาพรวมไม่เกินประมาณ 18MB ต่อการสร้างหนึ่งครั้ง</p>
+                            </div>
+                            <div id="assetList" class="grid gap-2"></div>
+                            <button id="clearAssetsBtn" class="hidden w-full rounded-lg border border-slate-700 px-3 py-2 text-sm font-semibold text-slate-200 transition hover:border-rose-300 hover:text-rose-100">ล้างสื่อที่แนบ</button>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="mt-5 grid grid-cols-3 gap-2">
@@ -274,13 +312,18 @@
             tone: document.getElementById('tone'),
             duration: document.getElementById('duration'),
             notes: document.getElementById('notes'),
-            avoidWords: document.getElementById('avoidWords')
+            avoidWords: document.getElementById('avoidWords'),
+            referenceText: document.getElementById('referenceText'),
+            referenceLinks: document.getElementById('referenceLinks')
         };
 
         const generateButtons = Array.from(document.querySelectorAll('.generateBtn'));
         const saveMemoryBtn = document.getElementById('saveMemoryBtn');
         const loadMemoryBtn = document.getElementById('loadMemoryBtn');
         const clearMemoryBtn = document.getElementById('clearMemoryBtn');
+        const imageInput = document.getElementById('imageInput');
+        const assetList = document.getElementById('assetList');
+        const clearAssetsBtn = document.getElementById('clearAssetsBtn');
         const loading = document.getElementById('loading');
         const placeholder = document.getElementById('placeholder');
         const result = document.getElementById('result');
@@ -290,6 +333,7 @@
         const downloadBtn = document.getElementById('downloadBtn');
         const notification = document.getElementById('notification');
         let latestMarkdown = '';
+        let attachedImages = [];
 
         const memoryKey = 'inspireaiBrandMemory';
         const businessPresets = {
@@ -339,7 +383,7 @@
         });
 
         function getMemoryFields() {
-            const { apiKey, ...brandFields } = fields;
+            const { apiKey, referenceText, referenceLinks, ...brandFields } = fields;
             return brandFields;
         }
 
@@ -375,6 +419,67 @@
         saveMemoryBtn.addEventListener('click', saveBrandMemory);
         loadMemoryBtn.addEventListener('click', loadBrandMemory);
         clearMemoryBtn.addEventListener('click', clearBrandMemory);
+
+        function fileToGenerativePart(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const result = reader.result;
+                    const base64 = result.split(',')[1];
+                    resolve({
+                        name: file.name,
+                        size: file.size,
+                        mimeType: file.type,
+                        inlineData: {
+                            mimeType: file.type,
+                            data: base64
+                        }
+                    });
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)}KB`;
+            return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
+        }
+
+        function renderAssetList() {
+            const links = fields.referenceLinks.value.split('\n').map((url) => url.trim()).filter(Boolean);
+            const textLength = fields.referenceText.value.trim().length;
+            const imageChips = attachedImages.map((image) => `<div class="asset-chip">ภาพ: ${escapeHtml(image.name)} (${formatFileSize(image.size)})</div>`).join('');
+            const linkChips = links.map((url) => `<div class="asset-chip">ลิงก์: ${escapeHtml(url)}</div>`).join('');
+            const textChip = textLength ? `<div class="asset-chip">ข้อความอ้างอิง: ${textLength.toLocaleString()} ตัวอักษร</div>` : '';
+            assetList.innerHTML = `${textChip}${linkChips}${imageChips}`;
+            const hasAssets = Boolean(textLength || links.length || attachedImages.length);
+            clearAssetsBtn.classList.toggle('hidden', !hasAssets);
+        }
+
+        imageInput.addEventListener('change', async () => {
+            const files = Array.from(imageInput.files || []).filter((file) => file.type.startsWith('image/'));
+            const totalSize = files.reduce((sum, file) => sum + file.size, 0);
+            if (totalSize > 18 * 1024 * 1024) {
+                imageInput.value = '';
+                showNotification('ภาพรวมใหญ่เกินไป กรุณาเลือกไม่เกิน 18MB', true);
+                return;
+            }
+            attachedImages = await Promise.all(files.map(fileToGenerativePart));
+            renderAssetList();
+            if (attachedImages.length) showNotification(`แนบภาพแล้ว ${attachedImages.length} ไฟล์`);
+        });
+
+        fields.referenceText.addEventListener('input', renderAssetList);
+        fields.referenceLinks.addEventListener('input', renderAssetList);
+        clearAssetsBtn.addEventListener('click', () => {
+            fields.referenceText.value = '';
+            fields.referenceLinks.value = '';
+            imageInput.value = '';
+            attachedImages = [];
+            renderAssetList();
+            showNotification('ล้างสื่อที่แนบแล้ว');
+        });
 
         function showNotification(message, isError = false) {
             notification.textContent = message;
@@ -483,11 +588,17 @@
 - ระยะเวลาแผน: ${brief.duration}
 - ข้อจำกัด/สิ่งที่อยากเน้น: ${brief.notes || 'ไม่มี'}
 - คำต้องห้าม/สไตล์ที่ไม่ต้องการ: ${brief.avoidWords || 'ไม่มี'}
+- Reference text / รีวิว / transcript: ${brief.referenceText || 'ไม่มี'}
+- Reference links: ${brief.referenceLinks || 'ไม่มี'}
+- ภาพที่แนบ: ${attachedImages.length ? attachedImages.map((image) => image.name).join(', ') : 'ไม่มี'}
 
 ข้อบังคับเชิงคุณภาพ:
 - อย่าให้คำตอบเหมือน template ทั่วไป ต้องโยงกับประเภทธุรกิจ กลุ่มเป้าหมาย และ proof
 - ทุก output ต้องมีเหตุผลทางการตลาดที่นำไปตัดสินใจต่อได้
 - เขียนแบบนักการตลาดไทยที่เข้าใจพฤติกรรมผู้ใช้โซเชียล ไม่ใช้ภาษาทางการเกินไป
+- ถ้ามี reference text, links, หรือภาพที่แนบ ให้ใช้เป็นหลักฐานและแรงบันดาลใจอย่างชัดเจน
+- ถ้าวิเคราะห์จากภาพ ให้พูดถึงสิ่งที่เห็นได้จริง เช่น mood, product cue, visual hook, composition, color, text overlay ที่เหมาะสม
+- เริ่มคำตอบด้วยหัวข้อ ## Asset Insights และสรุปว่าใช้ reference text, links, หรือภาพที่แนบอย่างไร
 `;
 
             const modes = {
@@ -548,13 +659,17 @@
             return `${base}\n${modes[mode]}`;
         }
 
-        async function callGemini(prompt, apiKey) {
+        async function callGemini(prompt, apiKey, imageParts = []) {
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
+            const parts = [
+                { text: prompt },
+                ...imageParts.map((image) => ({ inlineData: image.inlineData }))
+            ];
             const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    contents: [{ parts: [{ text: prompt }] }],
+                    contents: [{ parts }],
                     generationConfig: {
                         temperature: 0.75,
                         topP: 0.9
@@ -586,10 +701,10 @@
             downloadBtn.classList.add('hidden');
 
             try {
-                const markdown = await callGemini(buildPrompt(mode, brief), brief.apiKey);
+                const markdown = await callGemini(buildPrompt(mode, brief), brief.apiKey, attachedImages);
                 latestMarkdown = markdown || 'ไม่พบผลลัพธ์จาก Gemini';
                 resultTitle.textContent = mode === 'campaign' ? 'Content Campaign Plan' : mode === 'video' ? 'Short Video Studio' : mode === 'repurpose' ? 'Repurpose Kit' : 'Hook Lab';
-                resultMeta.textContent = `${brief.brand} • ${brief.platform} • ${brief.duration}`;
+                resultMeta.textContent = `${brief.brand} • ${brief.platform} • ${brief.duration} • ${attachedImages.length} ภาพ`;
                 result.innerHTML = renderMarkdown(latestMarkdown);
                 result.classList.remove('hidden');
                 result.classList.add('fade-in');

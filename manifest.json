@@ -1,7 +1,7 @@
 {
   "name": "InspireAI Content Planner",
   "short_name": "InspireAI",
-  "description": "Thai-first AI content planner with brand memory, hook scoring, campaigns, and reusable post kits.",
+  "description": "Thai-first AI content planner with brand memory, reference assets, image context, hook scoring, and reusable post kits.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
