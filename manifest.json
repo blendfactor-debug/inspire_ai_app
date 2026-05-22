@@ -2,7 +2,8 @@
   "name": "InspireAI by blendfactor",
   "short_name": "InspireAI",
   "description": "AI-powered content idea generator for scripts, voice, and images.",
-  "start_url": "/inspire_ai_app.html",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#111827",
   "theme_color": "#eab308",
@@ -20,4 +21,3 @@
     }
   ]
 }
-

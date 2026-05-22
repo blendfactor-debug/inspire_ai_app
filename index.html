@@ -1,368 +1,368 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="th">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="2575.7">
-  <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InspireAI by blendfactor</title>
+    <!-- PWA additions -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#eab308">
+    <!-- End PWA additions -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js"></script>
+    <style>
+        body {
+            font-family: 'Sarabun', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .animate-spin-slow {
+            animation: spin 3s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .generated-item {
+            scroll-snap-align: start;
+        }
+        .generated-content-container::-webkit-scrollbar {
+            display: none; /* สำหรับ Chrome, Safari, and Opera */
+        }
+        .generated-content-container {
+            -ms-overflow-style: none; /* สำหรับ IE and Edge */
+            scrollbar-width: none; /* สำหรับ Firefox */
+        }
+         #notification {
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        }
+    </style>
 </head>
-<body>
-<p class="p1">&lt;!DOCTYPE html&gt;</p>
-<p class="p1">&lt;html lang="th"&gt;</p>
-<p class="p1">&lt;head&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta charset="UTF-8"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;title&gt;InspireAI by blendfactor&lt;/title&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- PWA additions --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;link rel="manifest" href="manifest.json"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta name="theme-color" content="#eab308"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- End PWA additions --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;script src="https://cdn.tailwindcss.com"&gt;&lt;/script&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;link rel="preconnect" href="https://fonts.googleapis.com"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;link rel="preconnect" href="https://fonts.gstatic.com" crossorigin&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;700&amp;display=swap" rel="stylesheet"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js"&gt;&lt;/script&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js"&gt;&lt;/script&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;style&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>body {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-family: 'Sarabun', sans-serif;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>-webkit-tap-highlight-color: transparent;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.animate-spin-slow {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>animation: spin 3s linear infinite;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>@keyframes spin {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>from { transform: rotate(0deg); }</p>
-<p class="p1"><span class="Apple-converted-space">            </span>to { transform: rotate(360deg); }</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.fade-in {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>animation: fadeIn 0.5s ease-in-out;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>@keyframes fadeIn {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>from { opacity: 0; transform: translateY(10px); }</p>
-<p class="p1"><span class="Apple-converted-space">            </span>to { opacity: 1; transform: translateY(0); }</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.generated-item {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>scroll-snap-align: start;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.generated-content-container::-webkit-scrollbar {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: none; /* สำหรับ Chrome, Safari, and Opera */</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>.generated-content-container {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>-ms-overflow-style: none; /* สำหรับ IE and Edge */</p>
-<p class="p1"><span class="Apple-converted-space">            </span>scrollbar-width: none; /* สำหรับ Firefox */</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">         </span>#notification {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/style&gt;</p>
-<p class="p1">&lt;/head&gt;</p>
-<p class="p1">&lt;body class="bg-gray-900 text-white min-h-screen flex flex-col items-center p-4 selection:bg-yellow-500/30"&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="w-full max-w-4xl mx-auto flex flex-col flex-grow"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;!-- Header --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;header class="text-center my-6"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;h1 class="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 to-amber-500"&gt;InspireAI&lt;/h1&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;p class="text-gray-400 mt-2"&gt;เครื่องมือสร้างไอเดียคอนเทนต์ด้วย AI&lt;/p&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/header&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;!-- Main Content --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;main class="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 md:p-8 shadow-2xl border border-gray-700 flex-grow"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;!-- Input Section --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="mb-6"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;label for="topic" class="block text-lg font-medium text-gray-300 mb-2"&gt;หัวข้อหลัก (Topic)&lt;/label&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;input type="text" id="topic" class="w-full bg-gray-900 border border-gray-600 rounded-lg py-3 px-4 text-white focus:ring-2 focus:ring-yellow-500 focus:outline-none transition" placeholder="เช่น 'วิธีดูแลต้นไม้ในคอนโด' หรือ 'รีวิวคาเฟ่เปิดใหม่'"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;!-- Buttons Section --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;button id="generateScript" class="bg-gradient-to-br from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700 text-gray-900 font-bold py-3 px-4 rounded-lg transition-transform transform hover:scale-105 shadow-lg"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;span class="button-text"&gt;สร้างไอเดียสคริปต์&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;button id="generateVoice" class="bg-gradient-to-br from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700 text-gray-900 font-bold py-3 px-4 rounded-lg transition-transform transform hover:scale-105 shadow-lg"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;span class="button-text"&gt;สร้างไอเดียเสียงพากย์&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;button id="generateImage" class="bg-gradient-to-br from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700 text-gray-900 font-bold py-3 px-4 rounded-lg transition-transform transform hover:scale-105 shadow-lg"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;span class="button-text"&gt;สร้างไอเดียภาพ&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;!-- Output Section --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;div id="output" class="mt-6"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;div id="loading" class="hidden text-center text-gray-400 py-8"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;svg class="animate-spin-slow h-12 w-12 text-yellow-500 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"&gt;&lt;/circle&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"&gt;&lt;/path&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/svg&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;p class="mt-4 text-lg"&gt;AI กำลังใช้ความคิดสร้างสรรค์... โปรดรอสักครู่&lt;/p&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;div id="placeholder" class="text-center text-gray-500 py-12 border-2 border-dashed border-gray-700 rounded-lg"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;p class="text-xl"&gt;ผลลัพธ์จะปรากฏที่นี่&lt;/p&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;p&gt;เลือกหัวข้อแล้วกดปุ่มเพื่อเริ่มต้น&lt;/p&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;div id="generatedContent" class="hidden"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;h2 id="resultTitle" class="text-2xl font-bold text-yellow-400 mb-4"&gt;&lt;/h2&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div id="textContent" class="bg-gray-900/70 p-4 rounded-lg prose prose-invert max-w-none prose-p:my-2 prose-headings:my-3"&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div id="imageGrid" class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4"&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">             </span>&lt;div class="flex justify-end mt-4 space-x-2"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;button id="copyAllBtn" class="hidden bg-gray-700 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-transform transform hover:scale-105"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>คัดลอกทั้งหมด</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;button id="downloadAllBtn" class="hidden bg-gray-700 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-transform transform hover:scale-105"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>ดาวน์โหลดทั้งหมด</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/main&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- Notification --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="notification" class="fixed bottom-5 right-5 bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg opacity-0 transform translate-y-10"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;p&gt;คัดลอกสำเร็จ!&lt;/p&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;script&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>const topicInput = document.getElementById('topic');</p>
-<p class="p1"><span class="Apple-converted-space">        </span>const generateScriptBtn = document.getElementById('generateScript');</p>
-<p class="p1"><span class="Apple-converted-space">        </span>const generateVoiceBtn = document.getElementById('generateVoice');</p>
-<p class="p1"><span class="Apple-converted-space">        </span>const generateImageBtn = document.getElementById('generateImage');</p>
-<p class="p1"><span class="Apple-converted-space">        </span>const loadingDiv = document.getElementById('loading');</p>
-<p class="p1"><span class="Apple-converted-space">        </span>const placeholderDiv = document.getElementById('placeholder');</p>
-<p class="p1"><span class="Apple-converted-space">        </span>const generatedContentDiv = document.getElementById('generatedContent');</p>
-<p class="p1"><span class="Apple-converted-space">        </span>const resultTitle = document.getElementById('resultTitle');</p>
-<p class="p1"><span class="Apple-converted-space">        </span>const textContent = document.getElementById('textContent');</p>
-<p class="p1"><span class="Apple-converted-space">        </span>const imageGrid = document.getElementById('imageGrid');</p>
-<p class="p1"><span class="Apple-converted-space">        </span>const notification = document.getElementById('notification');</p>
-<p class="p1"><span class="Apple-converted-space">        </span>const copyAllBtn = document.getElementById('copyAllBtn');</p>
-<p class="p1"><span class="Apple-converted-space">        </span>const downloadAllBtn = document.getElementById('downloadAllBtn');</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>const apiKey = "";<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">        </span>const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>// Utility functions</p>
-<p class="p1"><span class="Apple-converted-space">        </span>function showLoading() {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>loadingDiv.classList.remove('hidden');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>placeholderDiv.classList.add('hidden');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>generatedContentDiv.classList.add('hidden');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>disableButtons(true);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>function hideLoading() {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>loadingDiv.classList.add('hidden');</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>function showResult(title, contentHtml, imageUrls = []) {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>generatedContentDiv.classList.remove('hidden');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>generatedContentDiv.classList.add('fade-in');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>resultTitle.textContent = title;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>textContent.innerHTML = contentHtml;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>imageGrid.innerHTML = '';</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (imageUrls.length &gt; 0) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>textContent.classList.add('hidden');</p>
-<p class="p1"><span class="Apple-converted-space">                </span>imageGrid.classList.remove('hidden');</p>
-<p class="p1"><span class="Apple-converted-space">                </span>copyAllBtn.classList.add('hidden');</p>
-<p class="p1"><span class="Apple-converted-space">                </span>downloadAllBtn.classList.remove('hidden');</p>
-<p class="p1"><span class="Apple-converted-space">                </span>imageUrls.forEach(url =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>const imgContainer = document.createElement('div');</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>imgContainer.className = 'relative group aspect-square';</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>const img = document.createElement('img');</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>img.src = url;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>img.className = 'w-full h-full object-cover rounded-lg shadow-md transition-transform transform group-hover:scale-105';</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>img.onerror = () =&gt; img.src = 'https://placehold.co/512x512/111827/4a5568?text=Error';</p>
-<p class="p2"><span class="Apple-converted-space">                    </span></p>
-<p class="p1"><span class="Apple-converted-space">                    </span>const downloadBtn = document.createElement('button');</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>downloadBtn.innerHTML = `</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-download"&gt;&lt;path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"&gt;&lt;/path&gt;&lt;polyline points="7 10 12 15 17 10"&gt;&lt;/polyline&gt;&lt;line x1="12" y1="15" x2="12" y2="3"&gt;&lt;/line&gt;&lt;/svg&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>`;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>downloadBtn.className = 'absolute bottom-2 right-2 bg-black/50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity';</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>downloadBtn.onclick = (e) =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>e.stopPropagation();</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>downloadFile(url, `inspireai-image-${Date.now()}.png`);</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>};</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">                    </span>imgContainer.appendChild(img);</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>imgContainer.appendChild(downloadBtn);</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>imageGrid.appendChild(imgContainer);</p>
-<p class="p1"><span class="Apple-converted-space">                </span>});</p>
-<p class="p1"><span class="Apple-converted-space">            </span>} else {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>textContent.classList.remove('hidden');</p>
-<p class="p1"><span class="Apple-converted-space">                </span>imageGrid.classList.add('hidden');</p>
-<p class="p1"><span class="Apple-converted-space">                </span>copyAllBtn.classList.remove('hidden');</p>
-<p class="p1"><span class="Apple-converted-space">                </span>downloadAllBtn.classList.add('hidden');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">            </span>disableButtons(false);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><span class="Apple-converted-space">        </span></p>
-<p class="p1"><span class="Apple-converted-space">        </span>function disableButtons(disabled) {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>generateScriptBtn.disabled = disabled;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>generateVoiceBtn.disabled = disabled;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>generateImageBtn.disabled = disabled;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>[generateScriptBtn, generateVoiceBtn, generateImageBtn].forEach(btn =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (disabled) {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>btn.classList.add('opacity-50', 'cursor-not-allowed');</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>btn.querySelector('.button-text').textContent = 'กำลังสร้าง...';</p>
-<p class="p1"><span class="Apple-converted-space">                </span>} else {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>btn.classList.remove('opacity-50', 'cursor-not-allowed');</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}</p>
-<p class="p1"><span class="Apple-converted-space">            </span>});</p>
-<p class="p1"><span class="Apple-converted-space">            </span>// Reset text after a short delay</p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (!disabled) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>setTimeout(() =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>generateScriptBtn.querySelector('.button-text').textContent = 'สร้างไอเดียสคริปต์';</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>generateVoiceBtn.querySelector('.button-text').textContent = 'สร้างไอเดียเสียงพากย์';</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>generateImageBtn.querySelector('.button-text').textContent = 'สร้างไอเดียภาพ';</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}, 100);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>function showNotification(message, isError = false) {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>notification.textContent = message;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>notification.className = `fixed bottom-5 right-5 text-white py-2 px-4 rounded-lg shadow-lg opacity-100 transform -translate-y-5 ${isError ? 'bg-red-500' : 'bg-green-500'}`;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>setTimeout(() =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>notification.className = notification.className.replace('opacity-100 -translate-y-5', 'opacity-0 translate-y-10');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}, 3000);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>async function callGenerativeApi(prompt) {</p>
-<p class="p1"><span class="Apple-converted-space">             </span>if (!topicInput.value.trim()) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>showNotification("กรุณาใส่หัวข้อหลักก่อนครับ", true);</p>
-<p class="p1"><span class="Apple-converted-space">                </span>return null;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">            </span>showLoading();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>try {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const payload = {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>contents: [{ parts: [{ text: prompt }] }],</p>
-<p class="p1"><span class="Apple-converted-space">                </span>};</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const response = await fetch(apiUrl, {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>method: 'POST',</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>headers: { 'Content-Type': 'application/json' },</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>body: JSON.stringify(payload)</p>
-<p class="p1"><span class="Apple-converted-space">                </span>});</p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (!response.ok) throw new Error(`API Error: ${response.statusText}`);</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const result = await response.json();</p>
-<p class="p1"><span class="Apple-converted-space">                </span>return result.candidates?.[0]?.content?.parts?.[0]?.text;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>} catch (error) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>console.error("API call failed:", error);</p>
-<p class="p1"><span class="Apple-converted-space">                </span>showNotification("เกิดข้อผิดพลาดในการเรียก AI", true);</p>
-<p class="p1"><span class="Apple-converted-space">                </span>showResult("เกิดข้อผิดพลาด", `&lt;p&gt;ไม่สามารถสร้างผลลัพธ์ได้ในขณะนี้ โปรดลองใหม่อีกครั้ง&lt;/p&gt;&lt;p class="text-xs text-gray-500 mt-2"&gt;Error: ${error.message}&lt;/p&gt;`);</p>
-<p class="p1"><span class="Apple-converted-space">                </span>return null;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>} finally {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>hideLoading();</p>
-<p class="p1"><span class="Apple-converted-space">                </span>disableButtons(false);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><span class="Apple-converted-space">        </span></p>
-<p class="p1"><span class="Apple-converted-space">        </span>async function downloadFile(url, filename) {</p>
-<p class="p1"><span class="Apple-converted-space">             </span>try {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const response = await fetch(url);</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const blob = await response.blob();</p>
-<p class="p1"><span class="Apple-converted-space">                </span>saveAs(blob, filename);</p>
-<p class="p1"><span class="Apple-converted-space">                </span>showNotification(`ดาวน์โหลด ${filename} สำเร็จ!`);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>} catch (error) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>console.error('Download error:', error);</p>
-<p class="p1"><span class="Apple-converted-space">                </span>showNotification(`เกิดข้อผิดพลาดในการดาวน์โหลด ${filename}`, true);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>// Event Listeners</p>
-<p class="p1"><span class="Apple-converted-space">        </span>generateScriptBtn.addEventListener('click', async () =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const topic = topicInput.value;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const prompt = `ในฐานะนักเขียนบทมืออาชีพ, จงสร้างไอเดียสคริปต์วิดีโอสั้น (Short video) สำหรับ TikTok/Reels/Shorts 3 ไอเดีย จากหัวข้อ "${topic}".</p>
-<p class="p1"><span class="Apple-converted-space">                </span>สำหรับแต่ละไอเดีย ให้ประกอบด้วย:</p>
-<p class="p1"><span class="Apple-converted-space">                </span>1. ชื่อคลิปที่ดึงดูด</p>
-<p class="p1"><span class="Apple-converted-space">                </span>2. โครงสร้างสคริปต์สั้นๆ แบ่งเป็น 3 ช่วง: Hook (เปิด), Value (เนื้อหา), CTA (ปิดท้าย)</p>
-<p class="p1"><span class="Apple-converted-space">                </span>3. แนวทางภาพและเสียงประกอบ</p>
-<p class="p2"><span class="Apple-converted-space">                </span></p>
-<p class="p1"><span class="Apple-converted-space">                </span>จัดรูปแบบผลลัพธ์เป็น HTML ที่สวยงาม ใช้ h3 สำหรับชื่อคลิป, p สำหรับเนื้อหา และ ul/li สำหรับรายการ`;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>const resultText = await callGenerativeApi(prompt);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (resultText) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>showResult(`ไอเดียสคริปต์สำหรับ '${topic}'`, resultText);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>});</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>generateVoiceBtn.addEventListener('click', async () =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const topic = topicInput.value;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const prompt = `ในฐานะ Creative Director, จงเขียนสคริปต์สำหรับเสียงพากย์ (Voice Over) 3 รูปแบบ สำหรับวิดีโอในหัวข้อ "${topic}".</p>
-<p class="p1"><span class="Apple-converted-space">                </span>แต่ละรูปแบบให้มี Mood &amp; Tone ที่แตกต่างกัน เช่น:</p>
-<p class="p1"><span class="Apple-converted-space">                </span>1. สไตล์สนุกสนาน, เป็นกันเอง, เข้าถึงง่าย</p>
-<p class="p1"><span class="Apple-converted-space">                </span>2. สไตล์น่าเชื่อถือ, ให้ความรู้, เป็นทางการ</p>
-<p class="p1"><span class="Apple-converted-space">                </span>3. สไตล์สร้างแรงบันดาลใจ, ดึงดูดอารมณ์</p>
-<p class="p2"><span class="Apple-converted-space">                </span></p>
-<p class="p1"><span class="Apple-converted-space">                </span>สำหรับแต่ละรูปแบบ ให้ระบุ Mood &amp; Tone และตามด้วยตัวอย่างสคริปต์ความยาวประมาณ 30-45 วินาที</p>
-<p class="p1"><span class="Apple-converted-space">                </span>จัดรูปแบบผลลัพธ์เป็น HTML ที่สวยงาม ใช้ h3 สำหรับชื่อสไตล์ และ p สำหรับสคริปต์`;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>const resultText = await callGenerativeApi(prompt);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (resultText) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>showResult(`ไอเดียเสียงพากย์สำหรับ '${topic}'`, resultText);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>});</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>generateImageBtn.addEventListener('click', async () =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">             </span>const topic = topicInput.value;</p>
-<p class="p1"><span class="Apple-converted-space">             </span>const prompt = `ในฐานะ Art Director, จงอธิบายไอเดียภาพหรือ Key Visual สำหรับคอนเทนต์หัวข้อ "${topic}" จำนวน 4 ไอเดีย โดยแต่ละไอเดียให้บอกรายละเอียดเกี่ยวกับ:</p>
-<p class="p1"><span class="Apple-converted-space">                </span>1. Mood &amp; Tone ของภาพ</p>
-<p class="p1"><span class="Apple-converted-space">                </span>2. องค์ประกอบในภาพ (Composition)</p>
-<p class="p1"><span class="Apple-converted-space">                </span>3. โทนสี (Color Palette)</p>
-<p class="p2"><span class="Apple-converted-space">                </span></p>
-<p class="p1"><span class="Apple-converted-space">                </span>จากนั้นให้สร้าง Prompt สำหรับ AI Image Generator (เช่น Midjourney, DALL-E) ที่สอดคล้องกับแต่ละไอเดีย</p>
-<p class="p2"><span class="Apple-converted-space">                </span></p>
-<p class="p1"><span class="Apple-converted-space">                </span>จัดรูปแบบผลลัพธ์เป็น HTML ที่สวยงาม ใช้ h3 สำหรับชื่อไอเดีย, p สำหรับคำอธิบาย และ code block สำหรับ Prompt ของ AI`;</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>const textResult = await callGenerativeApi(prompt);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (textResult) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>// This is a simplified approach. A real app would use an image generation API.</p>
-<p class="p1"><span class="Apple-converted-space">                </span>// Here we simulate getting image URLs based on the topic.</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const keywords = topic.split(' ').join('+');</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const imageUrls = Array.from({length: 4}, (_, i) =&gt; `https://source.unsplash.com/512x512/?${keywords}&amp;sig=${i}${Date.now()}`);</p>
-<p class="p1"><span class="Apple-converted-space">                </span>showResult(`ไอเดียภาพสำหรับ '${topic}'`, textResult, imageUrls);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>});</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>copyAllBtn.addEventListener('click', () =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const textToCopy = textContent.innerText;</p>
-<p class="p1"><span class="Apple-converted-space">             </span>navigator.clipboard.writeText(textToCopy).then(() =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>showNotification('คัดลอกเนื้อหาทั้งหมดสำเร็จ!');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}, (err) =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>console.error('Async: Could not copy text: ', err);</p>
-<p class="p1"><span class="Apple-converted-space">                </span>showNotification('ไม่สามารถคัดลอกได้', true);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>});</p>
-<p class="p1"><span class="Apple-converted-space">        </span>});</p>
-<p class="p2"><span class="Apple-converted-space">        </span></p>
-<p class="p1"><span class="Apple-converted-space">        </span>downloadAllBtn.addEventListener('click', async () =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">             </span>const allImages = Array.from(imageGrid.querySelectorAll('img'));</p>
-<p class="p1"><span class="Apple-converted-space">             </span>if(allImages.length === 0) return;</p>
-<p class="p1"><span class="Apple-converted-space">             </span>showNotification(`กำลังดาวน์โหลดทั้งหมด ${allImages.length} ภาพ...`);</p>
-<p class="p1"><span class="Apple-converted-space">             </span>for (let i = 0; i &lt; allImages.length; i++) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>await downloadFile(allImages[i].src, `inspireai-image-${i + 1}.png`);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>});</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/script&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- PWA additions --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;script&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>if ('serviceWorker' in navigator) {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>window.addEventListener('load', () =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>navigator.serviceWorker.register('sw.js').then(registration =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>console.log('ServiceWorker registration successful with scope: ', registration.scope);</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}, err =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>console.log('ServiceWorker registration failed: ', err);</p>
-<p class="p1"><span class="Apple-converted-space">                </span>});</p>
-<p class="p1"><span class="Apple-converted-space">            </span>});</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/script&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;!-- End PWA additions --&gt;</p>
-<p class="p1">&lt;/body&gt;</p>
-<p class="p1">&lt;/html&gt;</p>
-<p class="p2"><br></p>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center p-4 selection:bg-yellow-500/30">
+
+    <div class="w-full max-w-4xl mx-auto flex flex-col flex-grow">
+        <!-- Header -->
+        <header class="text-center my-6">
+            <h1 class="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 to-amber-500">InspireAI</h1>
+            <p class="text-gray-400 mt-2">เครื่องมือสร้างไอเดียคอนเทนต์ด้วย AI</p>
+        </header>
+
+        <!-- Main Content -->
+        <main class="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 md:p-8 shadow-2xl border border-gray-700 flex-grow">
+            <!-- Input Section -->
+            <div class="mb-6">
+                <label for="topic" class="block text-lg font-medium text-gray-300 mb-2">หัวข้อหลัก (Topic)</label>
+                <input type="text" id="topic" class="w-full bg-gray-900 border border-gray-600 rounded-lg py-3 px-4 text-white focus:ring-2 focus:ring-yellow-500 focus:outline-none transition" placeholder="เช่น 'วิธีดูแลต้นไม้ในคอนโด' หรือ 'รีวิวคาเฟ่เปิดใหม่'">
+            </div>
+            <div class="mb-6">
+                <label for="apiKey" class="block text-lg font-medium text-gray-300 mb-2">Gemini API Key</label>
+                <input type="password" id="apiKey" class="w-full bg-gray-900 border border-gray-600 rounded-lg py-3 px-4 text-white focus:ring-2 focus:ring-yellow-500 focus:outline-none transition" placeholder="วาง API key เพื่อใช้งาน AI">
+                <p class="text-sm text-gray-500 mt-2">คีย์จะถูกเก็บไว้ในเบราว์เซอร์ของคุณเท่านั้น และไม่ถูกบันทึกลงใน GitHub</p>
+            </div>
+
+            <!-- Buttons Section -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <button id="generateScript" class="bg-gradient-to-br from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700 text-gray-900 font-bold py-3 px-4 rounded-lg transition-transform transform hover:scale-105 shadow-lg">
+                    <span class="button-text">สร้างไอเดียสคริปต์</span>
+                </button>
+                <button id="generateVoice" class="bg-gradient-to-br from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700 text-gray-900 font-bold py-3 px-4 rounded-lg transition-transform transform hover:scale-105 shadow-lg">
+                    <span class="button-text">สร้างไอเดียเสียงพากย์</span>
+                </button>
+                <button id="generateImage" class="bg-gradient-to-br from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700 text-gray-900 font-bold py-3 px-4 rounded-lg transition-transform transform hover:scale-105 shadow-lg">
+                    <span class="button-text">สร้างไอเดียภาพ</span>
+                </button>
+            </div>
+
+            <!-- Output Section -->
+            <div id="output" class="mt-6">
+                <div id="loading" class="hidden text-center text-gray-400 py-8">
+                    <svg class="animate-spin-slow h-12 w-12 text-yellow-500 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <p class="mt-4 text-lg">AI กำลังใช้ความคิดสร้างสรรค์... โปรดรอสักครู่</p>
+                </div>
+                <div id="placeholder" class="text-center text-gray-500 py-12 border-2 border-dashed border-gray-700 rounded-lg">
+                    <p class="text-xl">ผลลัพธ์จะปรากฏที่นี่</p>
+                    <p>เลือกหัวข้อแล้วกดปุ่มเพื่อเริ่มต้น</p>
+                </div>
+                <div id="generatedContent" class="hidden">
+                    <h2 id="resultTitle" class="text-2xl font-bold text-yellow-400 mb-4"></h2>
+                    <div id="textContent" class="bg-gray-900/70 p-4 rounded-lg prose prose-invert max-w-none prose-p:my-2 prose-headings:my-3"></div>
+                    <div id="imageGrid" class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4"></div>
+                </div>
+            </div>
+             <div class="flex justify-end mt-4 space-x-2">
+                <button id="copyAllBtn" class="hidden bg-gray-700 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-transform transform hover:scale-105">
+                    คัดลอกทั้งหมด
+                </button>
+                <button id="downloadAllBtn" class="hidden bg-gray-700 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-transform transform hover:scale-105">
+                    ดาวน์โหลดทั้งหมด
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="fixed bottom-5 right-5 bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg opacity-0 transform translate-y-10">
+        <p>คัดลอกสำเร็จ!</p>
+    </div>
+
+
+    <script>
+        const topicInput = document.getElementById('topic');
+        const generateScriptBtn = document.getElementById('generateScript');
+        const generateVoiceBtn = document.getElementById('generateVoice');
+        const generateImageBtn = document.getElementById('generateImage');
+        const loadingDiv = document.getElementById('loading');
+        const placeholderDiv = document.getElementById('placeholder');
+        const generatedContentDiv = document.getElementById('generatedContent');
+        const resultTitle = document.getElementById('resultTitle');
+        const textContent = document.getElementById('textContent');
+        const imageGrid = document.getElementById('imageGrid');
+        const notification = document.getElementById('notification');
+        const copyAllBtn = document.getElementById('copyAllBtn');
+        const downloadAllBtn = document.getElementById('downloadAllBtn');
+        const apiKeyInput = document.getElementById('apiKey');
+
+        const savedApiKey = localStorage.getItem('inspireaiGeminiApiKey') || '';
+        apiKeyInput.value = savedApiKey;
+        apiKeyInput.addEventListener('change', () => {
+            localStorage.setItem('inspireaiGeminiApiKey', apiKeyInput.value.trim());
+            showNotification('บันทึก API key แล้ว');
+        });
+
+        // Utility functions
+        function showLoading() {
+            loadingDiv.classList.remove('hidden');
+            placeholderDiv.classList.add('hidden');
+            generatedContentDiv.classList.add('hidden');
+            disableButtons(true);
+        }
+
+        function hideLoading() {
+            loadingDiv.classList.add('hidden');
+        }
+
+        function showResult(title, contentHtml, imageUrls = []) {
+            generatedContentDiv.classList.remove('hidden');
+            generatedContentDiv.classList.add('fade-in');
+            resultTitle.textContent = title;
+            textContent.innerHTML = contentHtml;
+            imageGrid.innerHTML = '';
+
+            if (imageUrls.length > 0) {
+                textContent.classList.add('hidden');
+                imageGrid.classList.remove('hidden');
+                copyAllBtn.classList.add('hidden');
+                downloadAllBtn.classList.remove('hidden');
+                imageUrls.forEach(url => {
+                    const imgContainer = document.createElement('div');
+                    imgContainer.className = 'relative group aspect-square';
+                    const img = document.createElement('img');
+                    img.src = url;
+                    img.className = 'w-full h-full object-cover rounded-lg shadow-md transition-transform transform group-hover:scale-105';
+                    img.onerror = () => img.src = 'https://placehold.co/512x512/111827/4a5568?text=Error';
+
+                    const downloadBtn = document.createElement('button');
+                    downloadBtn.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    `;
+                    downloadBtn.className = 'absolute bottom-2 right-2 bg-black/50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity';
+                    downloadBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        downloadFile(url, `inspireai-image-${Date.now()}.png`);
+                    };
+
+                    imgContainer.appendChild(img);
+                    imgContainer.appendChild(downloadBtn);
+                    imageGrid.appendChild(imgContainer);
+                });
+            } else {
+                textContent.classList.remove('hidden');
+                imageGrid.classList.add('hidden');
+                copyAllBtn.classList.remove('hidden');
+                downloadAllBtn.classList.add('hidden');
+            }
+            disableButtons(false);
+        }
+
+        function disableButtons(disabled) {
+            generateScriptBtn.disabled = disabled;
+            generateVoiceBtn.disabled = disabled;
+            generateImageBtn.disabled = disabled;
+            [generateScriptBtn, generateVoiceBtn, generateImageBtn].forEach(btn => {
+                if (disabled) {
+                    btn.classList.add('opacity-50', 'cursor-not-allowed');
+                    btn.querySelector('.button-text').textContent = 'กำลังสร้าง...';
+                } else {
+                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+            });
+            // Reset text after a short delay
+            if (!disabled) {
+                setTimeout(() => {
+                    generateScriptBtn.querySelector('.button-text').textContent = 'สร้างไอเดียสคริปต์';
+                    generateVoiceBtn.querySelector('.button-text').textContent = 'สร้างไอเดียเสียงพากย์';
+                    generateImageBtn.querySelector('.button-text').textContent = 'สร้างไอเดียภาพ';
+                }, 100);
+            }
+        }
+
+        function showNotification(message, isError = false) {
+            notification.textContent = message;
+            notification.className = `fixed bottom-5 right-5 text-white py-2 px-4 rounded-lg shadow-lg opacity-100 transform -translate-y-5 ${isError ? 'bg-red-500' : 'bg-green-500'}`;
+            setTimeout(() => {
+                notification.className = notification.className.replace('opacity-100 -translate-y-5', 'opacity-0 translate-y-10');
+            }, 3000);
+        }
+
+        async function callGenerativeApi(prompt) {
+             if (!topicInput.value.trim()) {
+                showNotification("กรุณาใส่หัวข้อหลักก่อนครับ", true);
+                return null;
+            }
+            const apiKey = apiKeyInput.value.trim();
+            if (!apiKey) {
+                showNotification("กรุณาใส่ Gemini API Key ก่อนใช้งาน AI", true);
+                showResult("ต้องใส่ API Key ก่อน", `<p>กรุณาวาง Gemini API Key ในช่องด้านบน แล้วลองกดสร้างอีกครั้ง</p>`);
+                return null;
+            }
+            showLoading();
+            try {
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
+                const payload = {
+                    contents: [{ parts: [{ text: prompt }] }],
+                };
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
+                const result = await response.json();
+                return result.candidates?.[0]?.content?.parts?.[0]?.text;
+            } catch (error) {
+                console.error("API call failed:", error);
+                showNotification("เกิดข้อผิดพลาดในการเรียก AI", true);
+                showResult("เกิดข้อผิดพลาด", `<p>ไม่สามารถสร้างผลลัพธ์ได้ในขณะนี้ โปรดลองใหม่อีกครั้ง</p><p class="text-xs text-gray-500 mt-2">Error: ${error.message}</p>`);
+                return null;
+            } finally {
+                hideLoading();
+                disableButtons(false);
+            }
+        }
+
+        async function downloadFile(url, filename) {
+             try {
+                const response = await fetch(url);
+                const blob = await response.blob();
+                saveAs(blob, filename);
+                showNotification(`ดาวน์โหลด ${filename} สำเร็จ!`);
+            } catch (error) {
+                console.error('Download error:', error);
+                showNotification(`เกิดข้อผิดพลาดในการดาวน์โหลด ${filename}`, true);
+            }
+        }
+
+
+        // Event Listeners
+        generateScriptBtn.addEventListener('click', async () => {
+            const topic = topicInput.value;
+            const prompt = `ในฐานะนักเขียนบทมืออาชีพ, จงสร้างไอเดียสคริปต์วิดีโอสั้น (Short video) สำหรับ TikTok/Reels/Shorts 3 ไอเดีย จากหัวข้อ "${topic}".
+                สำหรับแต่ละไอเดีย ให้ประกอบด้วย:
+                1. ชื่อคลิปที่ดึงดูด
+                2. โครงสร้างสคริปต์สั้นๆ แบ่งเป็น 3 ช่วง: Hook (เปิด), Value (เนื้อหา), CTA (ปิดท้าย)
+                3. แนวทางภาพและเสียงประกอบ
+
+                จัดรูปแบบผลลัพธ์เป็น HTML ที่สวยงาม ใช้ h3 สำหรับชื่อคลิป, p สำหรับเนื้อหา และ ul/li สำหรับรายการ`;
+
+            const resultText = await callGenerativeApi(prompt);
+            if (resultText) {
+                showResult(`ไอเดียสคริปต์สำหรับ '${topic}'`, resultText);
+            }
+        });
+
+        generateVoiceBtn.addEventListener('click', async () => {
+            const topic = topicInput.value;
+            const prompt = `ในฐานะ Creative Director, จงเขียนสคริปต์สำหรับเสียงพากย์ (Voice Over) 3 รูปแบบ สำหรับวิดีโอในหัวข้อ "${topic}".
+                แต่ละรูปแบบให้มี Mood & Tone ที่แตกต่างกัน เช่น:
+                1. สไตล์สนุกสนาน, เป็นกันเอง, เข้าถึงง่าย
+                2. สไตล์น่าเชื่อถือ, ให้ความรู้, เป็นทางการ
+                3. สไตล์สร้างแรงบันดาลใจ, ดึงดูดอารมณ์
+
+                สำหรับแต่ละรูปแบบ ให้ระบุ Mood & Tone และตามด้วยตัวอย่างสคริปต์ความยาวประมาณ 30-45 วินาที
+                จัดรูปแบบผลลัพธ์เป็น HTML ที่สวยงาม ใช้ h3 สำหรับชื่อสไตล์ และ p สำหรับสคริปต์`;
+
+            const resultText = await callGenerativeApi(prompt);
+            if (resultText) {
+                showResult(`ไอเดียเสียงพากย์สำหรับ '${topic}'`, resultText);
+            }
+        });
+
+        generateImageBtn.addEventListener('click', async () => {
+             const topic = topicInput.value;
+             const prompt = `ในฐานะ Art Director, จงอธิบายไอเดียภาพหรือ Key Visual สำหรับคอนเทนต์หัวข้อ "${topic}" จำนวน 4 ไอเดีย โดยแต่ละไอเดียให้บอกรายละเอียดเกี่ยวกับ:
+                1. Mood & Tone ของภาพ
+                2. องค์ประกอบในภาพ (Composition)
+                3. โทนสี (Color Palette)
+
+                จากนั้นให้สร้าง Prompt สำหรับ AI Image Generator (เช่น Midjourney, DALL-E) ที่สอดคล้องกับแต่ละไอเดีย
+
+                จัดรูปแบบผลลัพธ์เป็น HTML ที่สวยงาม ใช้ h3 สำหรับชื่อไอเดีย, p สำหรับคำอธิบาย และ code block สำหรับ Prompt ของ AI`;
+
+            const textResult = await callGenerativeApi(prompt);
+            if (textResult) {
+                // This is a simplified approach. A real app would use an image generation API.
+                // Here we simulate getting image URLs based on the topic.
+                const keywords = topic.split(' ').join('+');
+                const imageUrls = Array.from({length: 4}, (_, i) => `https://source.unsplash.com/512x512/?${keywords}&sig=${i}${Date.now()}`);
+                showResult(`ไอเดียภาพสำหรับ '${topic}'`, textResult, imageUrls);
+            }
+        });
+
+        copyAllBtn.addEventListener('click', () => {
+            const textToCopy = textContent.innerText;
+             navigator.clipboard.writeText(textToCopy).then(() => {
+                showNotification('คัดลอกเนื้อหาทั้งหมดสำเร็จ!');
+            }, (err) => {
+                console.error('Async: Could not copy text: ', err);
+                showNotification('ไม่สามารถคัดลอกได้', true);
+            });
+        });
+
+        downloadAllBtn.addEventListener('click', async () => {
+             const allImages = Array.from(imageGrid.querySelectorAll('img'));
+             if(allImages.length === 0) return;
+             showNotification(`กำลังดาวน์โหลดทั้งหมด ${allImages.length} ภาพ...`);
+             for (let i = 0; i < allImages.length; i++) {
+                await downloadFile(allImages[i].src, `inspireai-image-${i + 1}.png`);
+            }
+        });
+
+    </script>
+    <!-- PWA additions -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').then(registration => {
+                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                }, err => {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+            });
+        }
+    </script>
+    <!-- End PWA additions -->
 </body>
 </html>

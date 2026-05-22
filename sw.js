@@ -1,7 +1,7 @@
-const CACHE_NAME = 'inspire-ai-cache-v1';
+const CACHE_NAME = 'inspire-ai-cache-v2';
 const urlsToCache = [
-  '/',
-  'inspire_ai_app.html',
+  './',
+  'index.html',
   'manifest.json'
   // หากมีไฟล์ CSS หรือ JS แยก หรือรูปภาพที่ต้องใช้ตลอด ก็เพิ่มที่นี่
 ];
@@ -44,7 +44,6 @@ self.addEventListener('activate', event => {
           }
         })
       );
-    })
+    }).then(() => self.clients.claim())
   );
 });
-
