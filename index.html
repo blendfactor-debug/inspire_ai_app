@@ -75,6 +75,12 @@
             background: #0f172a;
             padding: 0.75rem;
         }
+        .compare-panel {
+            border: 1px solid #334155;
+            border-radius: 8px;
+            background: #0f172a;
+            min-width: 0;
+        }
     </style>
 </head>
 <body class="min-h-screen bg-slate-950 text-slate-100 selection:bg-cyan-400/20">
@@ -277,6 +283,10 @@
                         <i data-lucide="flask-conical" class="h-5 w-5"></i>
                         Hook Lab + ให้คะแนน
                     </button>
+                    <button id="compareBtn" class="flex items-center justify-center gap-2 rounded-lg border border-cyan-500/60 bg-cyan-400/10 px-4 py-3 font-bold text-cyan-100 transition hover:border-cyan-300 hover:bg-cyan-400/20">
+                        <i data-lucide="columns-2" class="h-5 w-5"></i>
+                        Compare แผนคอนเทนต์
+                    </button>
                 </div>
             </section>
 
@@ -362,6 +372,7 @@
         };
 
         const generateButtons = Array.from(document.querySelectorAll('.generateBtn'));
+        const compareBtn = document.getElementById('compareBtn');
         const geminiKeyGroup = document.getElementById('geminiKeyGroup');
         const openaiKeyGroup = document.getElementById('openaiKeyGroup');
         const saveMemoryBtn = document.getElementById('saveMemoryBtn');
@@ -689,6 +700,9 @@
                 button.classList.toggle('opacity-60', isLoading);
                 button.classList.toggle('cursor-not-allowed', isLoading);
             });
+            compareBtn.disabled = isLoading;
+            compareBtn.classList.toggle('opacity-60', isLoading);
+            compareBtn.classList.toggle('cursor-not-allowed', isLoading);
         }
 
         function escapeHtml(value) {
@@ -746,6 +760,26 @@
 
             if (listOpen) html += '</ul>';
             return html;
+        }
+
+        function renderCompareResults(geminiResult, openAiResult) {
+            const panel = (title, status, markdown, error) => `
+                <section class="compare-panel overflow-hidden">
+                    <div class="border-b border-slate-800 px-4 py-3">
+                        <h3 class="font-bold text-white">${escapeHtml(title)}</h3>
+                        <p class="mt-1 text-xs ${status === 'ok' ? 'text-emerald-300' : 'text-rose-300'}">${status === 'ok' ? 'สำเร็จ' : 'ไม่สำเร็จ'}</p>
+                    </div>
+                    <div class="result max-h-[720px] overflow-auto p-4">
+                        ${status === 'ok' ? renderMarkdown(markdown) : `<p>${escapeHtml(error)}</p>`}
+                    </div>
+                </section>
+            `;
+            return `
+                <div class="grid gap-4 xl:grid-cols-2">
+                    ${panel('Gemini 2.5 Flash', geminiResult.status, geminiResult.markdown, geminiResult.error)}
+                    ${panel(getProviderLabel('openai'), openAiResult.status, openAiResult.markdown, openAiResult.error)}
+                </div>
+            `;
         }
 
         function buildPrompt(mode, brief) {
@@ -989,9 +1023,89 @@
             }
         }
 
+        async function compareProviders(mode = 'campaign') {
+            const brief = getBrief();
+            if (!brief.apiKey) {
+                showNotification('กรุณาใส่ Gemini API Key ก่อน', true);
+                return;
+            }
+            if (!brief.openaiApiKey) {
+                showNotification('กรุณาใส่ OpenAI API Key ก่อน', true);
+                return;
+            }
+            const validationError = validateBrief({ ...brief, provider: 'gemini' });
+            if (validationError) {
+                showNotification(validationError, true);
+                return;
+            }
+
+            localStorage.setItem('inspireaiGeminiApiKey', brief.apiKey);
+            localStorage.setItem('inspireaiOpenAiApiKey', brief.openaiApiKey);
+            localStorage.setItem('inspireaiOpenAiModel', brief.openaiModel);
+            persistBrandMemory();
+            setLoading(true);
+            copyBtn.classList.add('hidden');
+            downloadBtn.classList.add('hidden');
+            saveOutputBtn.classList.add('hidden');
+
+            const prompt = buildPrompt(mode, brief);
+            const [geminiSettled, openAiSettled] = await Promise.allSettled([
+                callGemini(prompt, brief.apiKey, attachedImages),
+                callOpenAI(prompt, brief.openaiApiKey, brief.openaiModel, attachedImages)
+            ]);
+
+            const geminiResult = geminiSettled.status === 'fulfilled'
+                ? { status: 'ok', markdown: geminiSettled.value || 'ไม่พบผลลัพธ์จาก Gemini', error: '' }
+                : { status: 'error', markdown: '', error: geminiSettled.reason?.message || String(geminiSettled.reason) };
+            const openAiResult = openAiSettled.status === 'fulfilled'
+                ? { status: 'ok', markdown: openAiSettled.value || `ไม่พบผลลัพธ์จาก ${getProviderLabel('openai', brief.openaiModel)}`, error: '' }
+                : { status: 'error', markdown: '', error: openAiSettled.reason?.message || String(openAiSettled.reason) };
+
+            const modeTitle = getModeTitle(mode);
+            latestMarkdown = [
+                `# Compare: ${brief.brand} - ${modeTitle}`,
+                `## Gemini 2.5 Flash`,
+                geminiResult.status === 'ok' ? geminiResult.markdown : `Error: ${geminiResult.error}`,
+                `## ${getProviderLabel('openai', brief.openaiModel)}`,
+                openAiResult.status === 'ok' ? openAiResult.markdown : `Error: ${openAiResult.error}`
+            ].join('\n\n');
+            latestResult = {
+                id: createId(),
+                title: `${brief.brand} - Compare ${modeTitle}`,
+                brand: brief.brand,
+                mode: 'compare',
+                modeTitle: `Compare ${modeTitle}`,
+                provider: 'compare',
+                providerLabel: `Gemini vs ${getProviderLabel('openai', brief.openaiModel)}`,
+                markdown: latestMarkdown,
+                meta: {
+                    platform: brief.platform,
+                    duration: brief.duration,
+                    imageCount: attachedImages.length,
+                    referenceLinkCount: brief.referenceLinks.split('\n').filter(Boolean).length
+                },
+                createdAt: new Date().toISOString()
+            };
+
+            resultTitle.textContent = `Compare ${modeTitle}`;
+            resultMeta.textContent = `${brief.brand} • Gemini vs ${getProviderLabel('openai', brief.openaiModel)} • ${brief.platform}`;
+            result.innerHTML = renderCompareResults(geminiResult, openAiResult);
+            result.classList.remove('hidden');
+            result.classList.add('fade-in');
+            copyBtn.classList.remove('hidden');
+            copyBtn.classList.add('flex');
+            downloadBtn.classList.remove('hidden');
+            downloadBtn.classList.add('flex');
+            saveOutputBtn.classList.remove('hidden');
+            saveOutputBtn.classList.add('flex');
+            setLoading(false);
+            showNotification('Compare เสร็จแล้ว');
+        }
+
         generateButtons.forEach((button) => {
             button.addEventListener('click', () => generate(button.dataset.mode));
         });
+        compareBtn.addEventListener('click', () => compareProviders('campaign'));
 
         copyBtn.addEventListener('click', async () => {
             if (!latestMarkdown) return;
