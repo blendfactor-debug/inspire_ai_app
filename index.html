@@ -69,6 +69,12 @@
             font-size: 0.78rem;
             line-height: 1.35;
         }
+        .board-item {
+            border: 1px solid #334155;
+            border-radius: 8px;
+            background: #0f172a;
+            padding: 0.75rem;
+        }
     </style>
 </head>
 <body class="min-h-screen bg-slate-950 text-slate-100 selection:bg-cyan-400/20">
@@ -269,6 +275,10 @@
                             <i data-lucide="download" class="h-4 w-4"></i>
                             ดาวน์โหลด
                         </button>
+                        <button id="saveOutputBtn" class="hidden items-center gap-2 rounded-lg border border-slate-700 px-3 py-2 text-sm font-semibold text-slate-200 transition hover:border-emerald-300 hover:text-emerald-100">
+                            <i data-lucide="bookmark-plus" class="h-4 w-4"></i>
+                            บันทึก
+                        </button>
                     </div>
                 </div>
 
@@ -291,6 +301,17 @@
                 </div>
 
                 <article id="result" class="result hidden flex-1 overflow-auto p-5 md:p-7"></article>
+
+                <div class="border-t border-slate-800 p-4">
+                    <div class="mb-3 flex items-center justify-between gap-3">
+                        <div>
+                            <h2 class="text-lg font-bold text-white">Idea Board</h2>
+                            <p id="boardMeta" class="mt-1 text-sm text-slate-500">ยังไม่มีงานที่บันทึกไว้</p>
+                        </div>
+                        <button id="clearBoardBtn" class="hidden rounded-lg border border-slate-700 px-3 py-2 text-sm font-semibold text-slate-200 transition hover:border-rose-300 hover:text-rose-100">ล้างทั้งหมด</button>
+                    </div>
+                    <div id="savedList" class="grid gap-2"></div>
+                </div>
             </section>
         </main>
     </div>
@@ -331,11 +352,17 @@
         const resultMeta = document.getElementById('resultMeta');
         const copyBtn = document.getElementById('copyBtn');
         const downloadBtn = document.getElementById('downloadBtn');
+        const saveOutputBtn = document.getElementById('saveOutputBtn');
+        const savedList = document.getElementById('savedList');
+        const boardMeta = document.getElementById('boardMeta');
+        const clearBoardBtn = document.getElementById('clearBoardBtn');
         const notification = document.getElementById('notification');
         let latestMarkdown = '';
+        let latestResult = null;
         let attachedImages = [];
 
         const memoryKey = 'inspireaiBrandMemory';
+        const savedOutputsKey = 'inspireaiSavedOutputs';
         const businessPresets = {
             general: {
                 note: 'ใช้ insight จาก pain point, proof, offer และ objection ของลูกค้า',
@@ -487,6 +514,104 @@
             setTimeout(() => {
                 notification.className = notification.className.replace('opacity-100 translate-y-0', 'opacity-0 translate-y-4');
             }, 2600);
+        }
+
+        function getSavedOutputs() {
+            try {
+                return JSON.parse(localStorage.getItem(savedOutputsKey) || '[]');
+            } catch (error) {
+                return [];
+            }
+        }
+
+        function setSavedOutputs(items) {
+            localStorage.setItem(savedOutputsKey, JSON.stringify(items.slice(0, 30)));
+            renderSavedOutputs();
+        }
+
+        function getModeTitle(mode) {
+            return mode === 'campaign' ? 'Content Campaign Plan' : mode === 'video' ? 'Short Video Studio' : mode === 'repurpose' ? 'Repurpose Kit' : 'Hook Lab';
+        }
+
+        function formatDateTime(value) {
+            return new Intl.DateTimeFormat('th-TH', {
+                dateStyle: 'medium',
+                timeStyle: 'short'
+            }).format(new Date(value));
+        }
+
+        function createId() {
+            if (crypto?.randomUUID) return crypto.randomUUID();
+            return `item-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        }
+
+        function renderSavedOutputs() {
+            const items = getSavedOutputs();
+            boardMeta.textContent = items.length ? `${items.length} งานที่บันทึกไว้ในเบราว์เซอร์นี้` : 'ยังไม่มีงานที่บันทึกไว้';
+            clearBoardBtn.classList.toggle('hidden', items.length === 0);
+            savedList.innerHTML = items.map((item) => `
+                <div class="board-item">
+                    <div class="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+                        <div>
+                            <h3 class="font-bold text-white">${escapeHtml(item.title)}</h3>
+                            <p class="mt-1 text-xs text-slate-500">${escapeHtml(item.brand)} • ${escapeHtml(item.modeTitle)} • ${formatDateTime(item.createdAt)}</p>
+                        </div>
+                        <div class="flex shrink-0 gap-2">
+                            <button data-board-action="open" data-id="${item.id}" class="rounded-md border border-slate-700 px-2.5 py-1.5 text-xs font-semibold text-slate-200 hover:border-cyan-300 hover:text-cyan-100">เปิด</button>
+                            <button data-board-action="delete" data-id="${item.id}" class="rounded-md border border-slate-700 px-2.5 py-1.5 text-xs font-semibold text-slate-200 hover:border-rose-300 hover:text-rose-100">ลบ</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function saveCurrentOutput() {
+            if (!latestResult?.markdown) {
+                showNotification('ยังไม่มีผลลัพธ์ให้บันทึก', true);
+                return;
+            }
+            const items = getSavedOutputs();
+            const existingIndex = items.findIndex((item) => item.markdown === latestResult.markdown && item.brand === latestResult.brand);
+            const savedItem = {
+                ...latestResult,
+                id: existingIndex >= 0 ? items[existingIndex].id : createId(),
+                createdAt: existingIndex >= 0 ? items[existingIndex].createdAt : new Date().toISOString()
+            };
+            if (existingIndex >= 0) {
+                items.splice(existingIndex, 1);
+            }
+            setSavedOutputs([savedItem, ...items]);
+            showNotification('บันทึกลง Idea Board แล้ว');
+        }
+
+        function openSavedOutput(id) {
+            const item = getSavedOutputs().find((saved) => saved.id === id);
+            if (!item) return;
+            latestResult = item;
+            latestMarkdown = item.markdown;
+            resultTitle.textContent = item.modeTitle;
+            resultMeta.textContent = `${item.brand} • บันทึกเมื่อ ${formatDateTime(item.createdAt)}`;
+            result.innerHTML = renderMarkdown(item.markdown);
+            placeholder.classList.add('hidden');
+            result.classList.remove('hidden');
+            copyBtn.classList.remove('hidden');
+            copyBtn.classList.add('flex');
+            downloadBtn.classList.remove('hidden');
+            downloadBtn.classList.add('flex');
+            saveOutputBtn.classList.remove('hidden');
+            saveOutputBtn.classList.add('flex');
+            showNotification('เปิดงานที่บันทึกไว้แล้ว');
+        }
+
+        function deleteSavedOutput(id) {
+            setSavedOutputs(getSavedOutputs().filter((item) => item.id !== id));
+            showNotification('ลบงานแล้ว');
+        }
+
+        function clearSavedOutputs() {
+            localStorage.removeItem(savedOutputsKey);
+            renderSavedOutputs();
+            showNotification('ล้าง Idea Board แล้ว');
         }
 
         function getBrief() {
@@ -699,11 +824,28 @@
             setLoading(true);
             copyBtn.classList.add('hidden');
             downloadBtn.classList.add('hidden');
+            saveOutputBtn.classList.add('hidden');
 
             try {
                 const markdown = await callGemini(buildPrompt(mode, brief), brief.apiKey, attachedImages);
                 latestMarkdown = markdown || 'ไม่พบผลลัพธ์จาก Gemini';
-                resultTitle.textContent = mode === 'campaign' ? 'Content Campaign Plan' : mode === 'video' ? 'Short Video Studio' : mode === 'repurpose' ? 'Repurpose Kit' : 'Hook Lab';
+                const modeTitle = getModeTitle(mode);
+                latestResult = {
+                    id: createId(),
+                    title: `${brief.brand} - ${modeTitle}`,
+                    brand: brief.brand,
+                    mode,
+                    modeTitle,
+                    markdown: latestMarkdown,
+                    meta: {
+                        platform: brief.platform,
+                        duration: brief.duration,
+                        imageCount: attachedImages.length,
+                        referenceLinkCount: brief.referenceLinks.split('\n').filter(Boolean).length
+                    },
+                    createdAt: new Date().toISOString()
+                };
+                resultTitle.textContent = modeTitle;
                 resultMeta.textContent = `${brief.brand} • ${brief.platform} • ${brief.duration} • ${attachedImages.length} ภาพ`;
                 result.innerHTML = renderMarkdown(latestMarkdown);
                 result.classList.remove('hidden');
@@ -712,9 +854,12 @@
                 copyBtn.classList.add('flex');
                 downloadBtn.classList.remove('hidden');
                 downloadBtn.classList.add('flex');
+                saveOutputBtn.classList.remove('hidden');
+                saveOutputBtn.classList.add('flex');
                 showNotification('สร้างผลลัพธ์สำเร็จ');
             } catch (error) {
                 latestMarkdown = '';
+                latestResult = null;
                 resultTitle.textContent = 'เกิดข้อผิดพลาด';
                 resultMeta.textContent = 'ตรวจ API key หรือ quota แล้วลองอีกครั้ง';
                 result.innerHTML = `<p>${escapeHtml(error.message)}</p>`;
@@ -747,6 +892,15 @@
             showNotification('ดาวน์โหลดแล้ว');
         });
 
+        saveOutputBtn.addEventListener('click', saveCurrentOutput);
+        savedList.addEventListener('click', (event) => {
+            const button = event.target.closest('button[data-board-action]');
+            if (!button) return;
+            if (button.dataset.boardAction === 'open') openSavedOutput(button.dataset.id);
+            if (button.dataset.boardAction === 'delete') deleteSavedOutput(button.dataset.id);
+        });
+        clearBoardBtn.addEventListener('click', clearSavedOutputs);
+
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js').catch((error) => {
@@ -756,6 +910,7 @@
         }
 
         loadBrandMemory(true);
+        renderSavedOutputs();
         lucide.createIcons();
     </script>
 </body>
