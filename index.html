@@ -127,6 +127,12 @@
                         <label for="openaiApiKey" class="mb-1.5 block text-sm font-semibold text-slate-300">OpenAI API Key</label>
                         <input id="openaiApiKey" type="password" class="field w-full px-3 py-2.5" placeholder="วาง OpenAI API key">
                         <p class="mt-1.5 text-xs text-amber-300">โหมดทดลอง: key อยู่ใน browser เท่านั้น เหมาะใช้ส่วนตัว ไม่ควรส่งเว็บ public พร้อม key ของคุณ</p>
+                        <label for="openaiModel" class="mb-1.5 mt-3 block text-sm font-semibold text-slate-300">OpenAI Model</label>
+                        <select id="openaiModel" class="field w-full px-3 py-2.5">
+                            <option value="gpt-4.1">GPT-4.1</option>
+                            <option value="gpt-4.1-mini">GPT-4.1 Mini</option>
+                            <option value="gpt-4.1-nano">GPT-4.1 Nano</option>
+                        </select>
                     </div>
 
                     <div>
@@ -339,6 +345,7 @@
             provider: document.getElementById('provider'),
             apiKey: document.getElementById('apiKey'),
             openaiApiKey: document.getElementById('openaiApiKey'),
+            openaiModel: document.getElementById('openaiModel'),
             brand: document.getElementById('brand'),
             businessType: document.getElementById('businessType'),
             offer: document.getElementById('offer'),
@@ -415,9 +422,11 @@
         const savedApiKey = localStorage.getItem('inspireaiGeminiApiKey') || '';
         const savedOpenAiKey = localStorage.getItem('inspireaiOpenAiApiKey') || '';
         const savedProvider = localStorage.getItem('inspireaiProvider') || 'gemini';
+        const savedOpenAiModel = localStorage.getItem('inspireaiOpenAiModel') || 'gpt-4.1';
         fields.provider.value = savedProvider;
         fields.apiKey.value = savedApiKey;
         fields.openaiApiKey.value = savedOpenAiKey;
+        fields.openaiModel.value = savedOpenAiModel;
 
         function updateProviderUi() {
             const isOpenAi = fields.provider.value === 'openai';
@@ -438,6 +447,10 @@
         fields.openaiApiKey.addEventListener('change', () => {
             localStorage.setItem('inspireaiOpenAiApiKey', fields.openaiApiKey.value.trim());
             showNotification('บันทึก OpenAI API key แล้ว');
+        });
+        fields.openaiModel.addEventListener('change', () => {
+            localStorage.setItem('inspireaiOpenAiModel', fields.openaiModel.value);
+            showNotification(`เปลี่ยน OpenAI model เป็น ${fields.openaiModel.value}`);
         });
 
         fields.businessType.addEventListener('change', () => {
@@ -851,7 +864,7 @@
             return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
         }
 
-        async function callOpenAI(prompt, apiKey, imageParts = []) {
+        async function callOpenAI(prompt, apiKey, model, imageParts = []) {
             const content = [
                 { type: 'input_text', text: prompt },
                 ...imageParts.map((image) => ({
@@ -866,7 +879,7 @@
                     'Authorization': `Bearer ${apiKey}`
                 },
                 body: JSON.stringify({
-                    model: 'gpt-4.1',
+                    model,
                     input: [
                         {
                             role: 'user',
@@ -879,7 +892,7 @@
 
             if (!response.ok) {
                 const detail = await response.text();
-                throw new Error(`OpenAI API Error ${response.status}: ${detail.slice(0, 180)}`);
+                throw new Error(formatProviderError('openai', response.status, detail));
             }
 
             const data = await response.json();
@@ -888,13 +901,26 @@
 
         async function callSelectedProvider(prompt, brief) {
             if (brief.provider === 'openai') {
-                return callOpenAI(prompt, brief.openaiApiKey, attachedImages);
+                return callOpenAI(prompt, brief.openaiApiKey, brief.openaiModel, attachedImages);
             }
             return callGemini(prompt, brief.apiKey, attachedImages);
         }
 
-        function getProviderLabel(provider) {
-            return provider === 'openai' ? 'OpenAI GPT-4.1' : 'Gemini 2.5 Flash';
+        function getProviderLabel(provider, model = fields.openaiModel.value) {
+            return provider === 'openai' ? `OpenAI ${model}` : 'Gemini 2.5 Flash';
+        }
+
+        function formatProviderError(provider, status, detail) {
+            if (provider === 'openai' && status === 429 && detail.includes('exceeded your current quota')) {
+                return 'OpenAI แจ้งว่า quota/เครดิตของบัญชีหรือโปรเจกต์นี้ไม่พอ กรุณาเช็ก Billing, Credits หรือ Usage limits ใน OpenAI Platform';
+            }
+            if (provider === 'openai' && status === 401) {
+                return 'OpenAI API key ไม่ถูกต้องหรือไม่มีสิทธิ์ใช้งาน กรุณาตรวจ key อีกครั้ง';
+            }
+            if (provider === 'openai') {
+                return `OpenAI API Error ${status}: ${detail.slice(0, 220)}`;
+            }
+            return `Gemini API Error ${status}: ${detail.slice(0, 220)}`;
         }
 
         async function generate(mode) {
@@ -928,7 +954,7 @@
                     mode,
                     modeTitle,
                     provider: brief.provider,
-                    providerLabel: getProviderLabel(brief.provider),
+                    providerLabel: getProviderLabel(brief.provider, brief.openaiModel),
                     markdown: latestMarkdown,
                     meta: {
                         platform: brief.platform,
@@ -939,7 +965,7 @@
                     createdAt: new Date().toISOString()
                 };
                 resultTitle.textContent = modeTitle;
-                resultMeta.textContent = `${brief.brand} • ${getProviderLabel(brief.provider)} • ${brief.platform} • ${brief.duration} • ${attachedImages.length} ภาพ`;
+                resultMeta.textContent = `${brief.brand} • ${getProviderLabel(brief.provider, brief.openaiModel)} • ${brief.platform} • ${brief.duration} • ${attachedImages.length} ภาพ`;
                 result.innerHTML = renderMarkdown(latestMarkdown);
                 result.classList.remove('hidden');
                 result.classList.add('fade-in');
@@ -957,7 +983,7 @@
                 resultMeta.textContent = 'ตรวจ API key, quota หรือ provider แล้วลองอีกครั้ง';
                 result.innerHTML = `<p>${escapeHtml(error.message)}</p>`;
                 result.classList.remove('hidden');
-                showNotification('เรียก Gemini ไม่สำเร็จ', true);
+                showNotification(`เรียก ${getProviderLabel(brief.provider, brief.openaiModel)} ไม่สำเร็จ`, true);
             } finally {
                 setLoading(false);
             }
