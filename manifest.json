@@ -1,7 +1,7 @@
 {
   "name": "InspireAI Content Planner",
   "short_name": "InspireAI",
-  "description": "Thai-first AI content workspace with brand memory, reference assets, saved idea board, hook scoring, and reusable post kits.",
+  "description": "Thai-first AI content workspace with Gemini/OpenAI provider switching, brand memory, reference assets, saved idea board, and hook scoring.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
