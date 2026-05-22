@@ -1,7 +1,7 @@
 {
   "name": "InspireAI Content Planner",
   "short_name": "InspireAI",
-  "description": "Thai-first AI content workspace with Gemini/OpenAI compare mode, brand memory, reference assets, saved idea board, and hook scoring.",
+  "description": "Thai-first AI content workspace with Gemini/OpenAI compare mode, link reader, reference assets, brand memory, saved idea board, and hook scoring.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

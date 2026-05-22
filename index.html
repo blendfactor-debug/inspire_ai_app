@@ -245,7 +245,11 @@
                             <div>
                                 <label for="referenceLinks" class="mb-1.5 block text-sm font-semibold text-slate-300">ลิงก์อ้างอิง</label>
                                 <textarea id="referenceLinks" rows="2" class="field w-full resize-none px-3 py-2.5" placeholder="วาง URL ทีละบรรทัด เช่น landing page, โพสต์คู่แข่ง, moodboard"></textarea>
-                                <p class="mt-1.5 text-xs text-slate-500">ระบบจะใช้ URL เป็นบริบทใน prompt แต่ยังไม่ดึงเนื้อหาจากเว็บปลายทาง</p>
+                                <div class="mt-2 grid gap-2 sm:grid-cols-2">
+                                    <button id="readLinksBtn" class="rounded-lg border border-slate-700 px-3 py-2 text-sm font-semibold text-slate-200 transition hover:border-cyan-300 hover:text-cyan-100">อ่านลิงก์</button>
+                                    <button id="clearReadLinksBtn" class="rounded-lg border border-slate-700 px-3 py-2 text-sm font-semibold text-slate-200 transition hover:border-rose-300 hover:text-rose-100">ล้างเนื้อหาลิงก์</button>
+                                </div>
+                                <p id="linkReaderStatus" class="mt-1.5 text-xs text-slate-500">ระบบอ่านลิงก์ผ่าน Jina Reader แล้วเติมข้อความลง Reference Text</p>
                             </div>
                             <div>
                                 <label for="imageInput" class="mb-1.5 block text-sm font-semibold text-slate-300">ภาพสินค้า / screenshot / moodboard</label>
@@ -381,6 +385,9 @@
         const imageInput = document.getElementById('imageInput');
         const assetList = document.getElementById('assetList');
         const clearAssetsBtn = document.getElementById('clearAssetsBtn');
+        const readLinksBtn = document.getElementById('readLinksBtn');
+        const clearReadLinksBtn = document.getElementById('clearReadLinksBtn');
+        const linkReaderStatus = document.getElementById('linkReaderStatus');
         const loading = document.getElementById('loading');
         const placeholder = document.getElementById('placeholder');
         const result = document.getElementById('result');
@@ -547,6 +554,57 @@
             clearAssetsBtn.classList.toggle('hidden', !hasAssets);
         }
 
+        function getReferenceUrls() {
+            return fields.referenceLinks.value
+                .split('\n')
+                .map((url) => url.trim())
+                .filter(Boolean)
+                .filter((url) => /^https?:\/\//i.test(url));
+        }
+
+        async function readUrlContent(url) {
+            const readerUrl = `https://r.jina.ai/${url}`;
+            const response = await fetch(readerUrl, {
+                headers: { 'Accept': 'text/plain' }
+            });
+            if (!response.ok) {
+                throw new Error(`อ่านไม่ได้ (${response.status})`);
+            }
+            const text = await response.text();
+            return text.trim().slice(0, 12000);
+        }
+
+        async function readReferenceLinks() {
+            const urls = getReferenceUrls();
+            if (!urls.length) {
+                showNotification('กรุณาวางลิงก์ที่ขึ้นต้นด้วย http:// หรือ https://', true);
+                return;
+            }
+            readLinksBtn.disabled = true;
+            readLinksBtn.classList.add('opacity-60', 'cursor-not-allowed');
+            linkReaderStatus.textContent = `กำลังอ่าน ${urls.length} ลิงก์...`;
+
+            const results = [];
+            for (const url of urls.slice(0, 5)) {
+                try {
+                    linkReaderStatus.textContent = `กำลังอ่าน: ${url}`;
+                    const text = await readUrlContent(url);
+                    results.push(`\n\n---\nSource URL: ${url}\n\n${text}`);
+                } catch (error) {
+                    results.push(`\n\n---\nSource URL: ${url}\n\nอ่านลิงก์นี้ไม่สำเร็จ: ${error.message}`);
+                }
+            }
+
+            const existing = fields.referenceText.value.trim();
+            const linkBlock = `\n\n## เนื้อหาที่อ่านจากลิงก์\n${results.join('\n')}`.trim();
+            fields.referenceText.value = existing ? `${existing}\n\n${linkBlock}` : linkBlock;
+            linkReaderStatus.textContent = `อ่านเสร็จ ${Math.min(urls.length, 5)} ลิงก์ และเติมลง Reference Text แล้ว`;
+            readLinksBtn.disabled = false;
+            readLinksBtn.classList.remove('opacity-60', 'cursor-not-allowed');
+            renderAssetList();
+            showNotification('อ่านลิงก์เสร็จแล้ว');
+        }
+
         imageInput.addEventListener('change', async () => {
             const files = Array.from(imageInput.files || []).filter((file) => file.type.startsWith('image/'));
             const totalSize = files.reduce((sum, file) => sum + file.size, 0);
@@ -562,6 +620,13 @@
 
         fields.referenceText.addEventListener('input', renderAssetList);
         fields.referenceLinks.addEventListener('input', renderAssetList);
+        readLinksBtn.addEventListener('click', readReferenceLinks);
+        clearReadLinksBtn.addEventListener('click', () => {
+            fields.referenceText.value = fields.referenceText.value.replace(/\n*## เนื้อหาที่อ่านจากลิงก์[\s\S]*$/m, '').trim();
+            linkReaderStatus.textContent = 'ล้างเนื้อหาที่อ่านจากลิงก์แล้ว';
+            renderAssetList();
+            showNotification('ล้างเนื้อหาลิงก์แล้ว');
+        });
         clearAssetsBtn.addEventListener('click', () => {
             fields.referenceText.value = '';
             fields.referenceLinks.value = '';
