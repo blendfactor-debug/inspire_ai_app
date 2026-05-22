@@ -1,12 +1,12 @@
 {
-  "name": "InspireAI by blendfactor",
+  "name": "InspireAI Content Planner",
   "short_name": "InspireAI",
-  "description": "AI-powered content idea generator for scripts, voice, and images.",
+  "description": "Thai-first AI content planner for campaigns, short videos, and reusable post kits.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "background_color": "#111827",
-  "theme_color": "#eab308",
+  "theme_color": "#0f172a",
   "orientation": "portrait-primary",
   "icons": [
     {

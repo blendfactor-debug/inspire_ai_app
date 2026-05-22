@@ -3,366 +3,504 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>InspireAI by blendfactor</title>
-    <!-- PWA additions -->
+    <title>InspireAI Content Planner</title>
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#eab308">
-    <!-- End PWA additions -->
+    <meta name="theme-color" content="#0f172a">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;700&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root { color-scheme: dark; }
         body {
             font-family: 'Sarabun', sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
-        .animate-spin-slow {
-            animation: spin 3s linear infinite;
-        }
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
         .fade-in {
-            animation: fadeIn 0.5s ease-in-out;
+            animation: fadeIn 0.24s ease-out;
         }
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(6px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .generated-item {
-            scroll-snap-align: start;
+        .field {
+            background: #111827;
+            border: 1px solid #374151;
+            border-radius: 8px;
+            color: #f9fafb;
+            outline: none;
+            transition: border-color 0.16s ease, box-shadow 0.16s ease;
         }
-        .generated-content-container::-webkit-scrollbar {
-            display: none; /* สำหรับ Chrome, Safari, and Opera */
+        .field:focus {
+            border-color: #22d3ee;
+            box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.16);
         }
-        .generated-content-container {
-            -ms-overflow-style: none; /* สำหรับ IE and Edge */
-            scrollbar-width: none; /* สำหรับ Firefox */
+        .result h2, .result h3 {
+            color: #67e8f9;
+            font-weight: 700;
+            margin-top: 1.1rem;
+            margin-bottom: 0.55rem;
         }
-         #notification {
-            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        .result h2 { font-size: 1.25rem; }
+        .result h3 { font-size: 1.05rem; }
+        .result p, .result li {
+            color: #d1d5db;
+            line-height: 1.75;
+        }
+        .result ul, .result ol {
+            margin: 0.4rem 0 0.8rem 1.25rem;
+        }
+        .result code {
+            color: #fde68a;
+            background: rgba(250, 204, 21, 0.1);
+            border-radius: 6px;
+            padding: 0.08rem 0.32rem;
+        }
+        #notification {
+            transition: transform 0.22s ease, opacity 0.22s ease;
         }
     </style>
 </head>
-<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center p-4 selection:bg-yellow-500/30">
-
-    <div class="w-full max-w-4xl mx-auto flex flex-col flex-grow">
-        <!-- Header -->
-        <header class="text-center my-6">
-            <h1 class="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 to-amber-500">InspireAI</h1>
-            <p class="text-gray-400 mt-2">เครื่องมือสร้างไอเดียคอนเทนต์ด้วย AI</p>
+<body class="min-h-screen bg-slate-950 text-slate-100 selection:bg-cyan-400/20">
+    <div class="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-4 py-5 md:px-6">
+        <header class="mb-5 flex flex-col gap-3 border-b border-slate-800 pb-5 md:flex-row md:items-end md:justify-between">
+            <div>
+                <p class="text-sm font-semibold uppercase tracking-wide text-cyan-300">InspireAI</p>
+                <h1 class="mt-1 text-3xl font-bold text-white md:text-4xl">Content Planner</h1>
+                <p class="mt-2 max-w-2xl text-sm text-slate-400 md:text-base">วางแผนคอนเทนต์จาก brief เดียว ให้พร้อมใช้กับธุรกิจ ครีเอเตอร์ และทีมการตลาด</p>
+            </div>
+            <div class="grid grid-cols-3 gap-2 text-center text-xs text-slate-400 md:w-80">
+                <div class="rounded-lg border border-slate-800 bg-slate-900 px-3 py-2">
+                    <div class="text-base font-bold text-cyan-200">Plan</div>
+                    <div>calendar</div>
+                </div>
+                <div class="rounded-lg border border-slate-800 bg-slate-900 px-3 py-2">
+                    <div class="text-base font-bold text-amber-200">Script</div>
+                    <div>short video</div>
+                </div>
+                <div class="rounded-lg border border-slate-800 bg-slate-900 px-3 py-2">
+                    <div class="text-base font-bold text-rose-200">Reuse</div>
+                    <div>caption</div>
+                </div>
+            </div>
         </header>
 
-        <!-- Main Content -->
-        <main class="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 md:p-8 shadow-2xl border border-gray-700 flex-grow">
-            <!-- Input Section -->
-            <div class="mb-6">
-                <label for="topic" class="block text-lg font-medium text-gray-300 mb-2">หัวข้อหลัก (Topic)</label>
-                <input type="text" id="topic" class="w-full bg-gray-900 border border-gray-600 rounded-lg py-3 px-4 text-white focus:ring-2 focus:ring-yellow-500 focus:outline-none transition" placeholder="เช่น 'วิธีดูแลต้นไม้ในคอนโด' หรือ 'รีวิวคาเฟ่เปิดใหม่'">
-            </div>
-            <div class="mb-6">
-                <label for="apiKey" class="block text-lg font-medium text-gray-300 mb-2">Gemini API Key</label>
-                <input type="password" id="apiKey" class="w-full bg-gray-900 border border-gray-600 rounded-lg py-3 px-4 text-white focus:ring-2 focus:ring-yellow-500 focus:outline-none transition" placeholder="วาง API key เพื่อใช้งาน AI">
-                <p class="text-sm text-gray-500 mt-2">คีย์จะถูกเก็บไว้ในเบราว์เซอร์ของคุณเท่านั้น และไม่ถูกบันทึกลงใน GitHub</p>
-            </div>
+        <main class="grid flex-1 gap-5 lg:grid-cols-[420px_1fr]">
+            <section class="rounded-lg border border-slate-800 bg-slate-900/80 p-4 shadow-xl shadow-black/20 md:p-5">
+                <div class="mb-4 flex items-center justify-between">
+                    <h2 class="text-lg font-bold text-white">Creative Brief</h2>
+                    <span class="rounded-md bg-cyan-400/10 px-2 py-1 text-xs font-semibold text-cyan-200">Thai-first</span>
+                </div>
 
-            <!-- Buttons Section -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <button id="generateScript" class="bg-gradient-to-br from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700 text-gray-900 font-bold py-3 px-4 rounded-lg transition-transform transform hover:scale-105 shadow-lg">
-                    <span class="button-text">สร้างไอเดียสคริปต์</span>
-                </button>
-                <button id="generateVoice" class="bg-gradient-to-br from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700 text-gray-900 font-bold py-3 px-4 rounded-lg transition-transform transform hover:scale-105 shadow-lg">
-                    <span class="button-text">สร้างไอเดียเสียงพากย์</span>
-                </button>
-                <button id="generateImage" class="bg-gradient-to-br from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700 text-gray-900 font-bold py-3 px-4 rounded-lg transition-transform transform hover:scale-105 shadow-lg">
-                    <span class="button-text">สร้างไอเดียภาพ</span>
-                </button>
-            </div>
+                <div class="space-y-4">
+                    <div>
+                        <label for="apiKey" class="mb-1.5 block text-sm font-semibold text-slate-300">Gemini API Key</label>
+                        <input id="apiKey" type="password" class="field w-full px-3 py-2.5" placeholder="วาง API key ของคุณ">
+                        <p class="mt-1.5 text-xs text-slate-500">บันทึกเฉพาะในเบราว์เซอร์นี้ ไม่ถูกอัปโหลดไป GitHub</p>
+                    </div>
 
-            <!-- Output Section -->
-            <div id="output" class="mt-6">
-                <div id="loading" class="hidden text-center text-gray-400 py-8">
-                    <svg class="animate-spin-slow h-12 w-12 text-yellow-500 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <p class="mt-4 text-lg">AI กำลังใช้ความคิดสร้างสรรค์... โปรดรอสักครู่</p>
+                    <div>
+                        <label for="brand" class="mb-1.5 block text-sm font-semibold text-slate-300">แบรนด์ / โปรเจกต์</label>
+                        <input id="brand" class="field w-full px-3 py-2.5" placeholder="เช่น ร้านกาแฟ Slow Bar, คอร์สออนไลน์, คลินิก">
+                    </div>
+
+                    <div>
+                        <label for="offer" class="mb-1.5 block text-sm font-semibold text-slate-300">สินค้า / บริการ / หัวข้อหลัก</label>
+                        <textarea id="offer" rows="3" class="field w-full resize-none px-3 py-2.5" placeholder="สิ่งที่อยากโปรโมต จุดเด่น ราคา หรือปัญหาที่ช่วยแก้"></textarea>
+                    </div>
+
+                    <div>
+                        <label for="audience" class="mb-1.5 block text-sm font-semibold text-slate-300">กลุ่มเป้าหมาย</label>
+                        <input id="audience" class="field w-full px-3 py-2.5" placeholder="เช่น เจ้าของธุรกิจเล็ก, คนเริ่มออกกำลังกาย, Gen Z">
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        <div>
+                            <label for="goal" class="mb-1.5 block text-sm font-semibold text-slate-300">เป้าหมาย</label>
+                            <select id="goal" class="field w-full px-3 py-2.5">
+                                <option>เพิ่มยอดขาย</option>
+                                <option>สร้างการรับรู้แบรนด์</option>
+                                <option>เพิ่มผู้ติดตาม</option>
+                                <option>เก็บ lead / inbox</option>
+                                <option>ให้ความรู้ตลาด</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="platform" class="mb-1.5 block text-sm font-semibold text-slate-300">ช่องทางหลัก</label>
+                            <select id="platform" class="field w-full px-3 py-2.5">
+                                <option>TikTok / Reels / Shorts</option>
+                                <option>Facebook Page</option>
+                                <option>Instagram</option>
+                                <option>LinkedIn</option>
+                                <option>LINE OA</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        <div>
+                            <label for="tone" class="mb-1.5 block text-sm font-semibold text-slate-300">น้ำเสียงแบรนด์</label>
+                            <select id="tone" class="field w-full px-3 py-2.5">
+                                <option>เป็นกันเอง ชัดเจน</option>
+                                <option>ผู้เชี่ยวชาญ น่าเชื่อถือ</option>
+                                <option>สนุก ฉลาด ทันกระแส</option>
+                                <option>อบอุ่น สร้างแรงบันดาลใจ</option>
+                                <option>หรู เรียบ พรีเมียม</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="duration" class="mb-1.5 block text-sm font-semibold text-slate-300">ระยะเวลาแผน</label>
+                            <select id="duration" class="field w-full px-3 py-2.5">
+                                <option>7 วัน</option>
+                                <option>14 วัน</option>
+                                <option>30 วัน</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="notes" class="mb-1.5 block text-sm font-semibold text-slate-300">ข้อจำกัด / สิ่งที่อยากเน้น</label>
+                        <textarea id="notes" rows="3" class="field w-full resize-none px-3 py-2.5" placeholder="เช่น ห้ามขายตรงเกินไป, ต้องมี CTA ให้ทักแชต, ใช้ภาษาไทยง่าย ๆ"></textarea>
+                    </div>
                 </div>
-                <div id="placeholder" class="text-center text-gray-500 py-12 border-2 border-dashed border-gray-700 rounded-lg">
-                    <p class="text-xl">ผลลัพธ์จะปรากฏที่นี่</p>
-                    <p>เลือกหัวข้อแล้วกดปุ่มเพื่อเริ่มต้น</p>
+
+                <div class="mt-5 grid gap-2">
+                    <button data-mode="campaign" class="generateBtn flex items-center justify-center gap-2 rounded-lg bg-cyan-300 px-4 py-3 font-bold text-slate-950 transition hover:bg-cyan-200">
+                        <i data-lucide="calendar-days" class="h-5 w-5"></i>
+                        สร้างแผนคอนเทนต์
+                    </button>
+                    <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                        <button data-mode="video" class="generateBtn flex items-center justify-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-4 py-3 font-semibold text-slate-100 transition hover:border-amber-300 hover:text-amber-100">
+                            <i data-lucide="clapperboard" class="h-5 w-5"></i>
+                            ชุดวิดีโอสั้น
+                        </button>
+                        <button data-mode="repurpose" class="generateBtn flex items-center justify-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-4 py-3 font-semibold text-slate-100 transition hover:border-rose-300 hover:text-rose-100">
+                            <i data-lucide="repeat-2" class="h-5 w-5"></i>
+                            แตกเป็นโพสต์
+                        </button>
+                    </div>
                 </div>
-                <div id="generatedContent" class="hidden">
-                    <h2 id="resultTitle" class="text-2xl font-bold text-yellow-400 mb-4"></h2>
-                    <div id="textContent" class="bg-gray-900/70 p-4 rounded-lg prose prose-invert max-w-none prose-p:my-2 prose-headings:my-3"></div>
-                    <div id="imageGrid" class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4"></div>
+            </section>
+
+            <section class="flex min-h-[620px] flex-col rounded-lg border border-slate-800 bg-slate-900/60 shadow-xl shadow-black/20">
+                <div class="flex flex-col gap-3 border-b border-slate-800 p-4 md:flex-row md:items-center md:justify-between">
+                    <div>
+                        <h2 id="resultTitle" class="text-lg font-bold text-white">Workspace</h2>
+                        <p id="resultMeta" class="mt-1 text-sm text-slate-500">ผลลัพธ์จะปรากฏที่นี่</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button id="copyBtn" class="hidden items-center gap-2 rounded-lg border border-slate-700 px-3 py-2 text-sm font-semibold text-slate-200 transition hover:border-cyan-300 hover:text-cyan-100">
+                            <i data-lucide="copy" class="h-4 w-4"></i>
+                            คัดลอก
+                        </button>
+                        <button id="downloadBtn" class="hidden items-center gap-2 rounded-lg border border-slate-700 px-3 py-2 text-sm font-semibold text-slate-200 transition hover:border-amber-300 hover:text-amber-100">
+                            <i data-lucide="download" class="h-4 w-4"></i>
+                            ดาวน์โหลด
+                        </button>
+                    </div>
                 </div>
-            </div>
-             <div class="flex justify-end mt-4 space-x-2">
-                <button id="copyAllBtn" class="hidden bg-gray-700 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-transform transform hover:scale-105">
-                    คัดลอกทั้งหมด
-                </button>
-                <button id="downloadAllBtn" class="hidden bg-gray-700 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-transform transform hover:scale-105">
-                    ดาวน์โหลดทั้งหมด
-                </button>
-            </div>
+
+                <div id="loading" class="hidden flex-1 items-center justify-center p-8 text-center">
+                    <div>
+                        <div class="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-slate-700 border-t-cyan-300"></div>
+                        <p class="text-lg font-semibold text-slate-200">กำลังจัดแผนคอนเทนต์ให้พร้อมใช้</p>
+                        <p class="mt-1 text-sm text-slate-500">ระบบกำลังเรียบเรียง brief เป็น workflow</p>
+                    </div>
+                </div>
+
+                <div id="placeholder" class="flex flex-1 items-center justify-center p-8">
+                    <div class="max-w-md text-center">
+                        <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-lg bg-slate-800 text-cyan-200">
+                            <i data-lucide="sparkles" class="h-7 w-7"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-white">เริ่มจาก brief เดียว</h3>
+                        <p class="mt-2 text-slate-400">เติมข้อมูลแบรนด์และเป้าหมาย แล้วเลือกผลลัพธ์ที่อยากได้</p>
+                    </div>
+                </div>
+
+                <article id="result" class="result hidden flex-1 overflow-auto p-5 md:p-7"></article>
+            </section>
         </main>
     </div>
 
-    <!-- Notification -->
-    <div id="notification" class="fixed bottom-5 right-5 bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg opacity-0 transform translate-y-10">
-        <p>คัดลอกสำเร็จ!</p>
+    <div id="notification" class="fixed bottom-5 right-5 z-50 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white opacity-0 shadow-lg transform translate-y-4">
+        บันทึกแล้ว
     </div>
 
-
     <script>
-        const topicInput = document.getElementById('topic');
-        const generateScriptBtn = document.getElementById('generateScript');
-        const generateVoiceBtn = document.getElementById('generateVoice');
-        const generateImageBtn = document.getElementById('generateImage');
-        const loadingDiv = document.getElementById('loading');
-        const placeholderDiv = document.getElementById('placeholder');
-        const generatedContentDiv = document.getElementById('generatedContent');
+        const fields = {
+            apiKey: document.getElementById('apiKey'),
+            brand: document.getElementById('brand'),
+            offer: document.getElementById('offer'),
+            audience: document.getElementById('audience'),
+            goal: document.getElementById('goal'),
+            platform: document.getElementById('platform'),
+            tone: document.getElementById('tone'),
+            duration: document.getElementById('duration'),
+            notes: document.getElementById('notes')
+        };
+
+        const generateButtons = Array.from(document.querySelectorAll('.generateBtn'));
+        const loading = document.getElementById('loading');
+        const placeholder = document.getElementById('placeholder');
+        const result = document.getElementById('result');
         const resultTitle = document.getElementById('resultTitle');
-        const textContent = document.getElementById('textContent');
-        const imageGrid = document.getElementById('imageGrid');
+        const resultMeta = document.getElementById('resultMeta');
+        const copyBtn = document.getElementById('copyBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
         const notification = document.getElementById('notification');
-        const copyAllBtn = document.getElementById('copyAllBtn');
-        const downloadAllBtn = document.getElementById('downloadAllBtn');
-        const apiKeyInput = document.getElementById('apiKey');
+        let latestMarkdown = '';
 
         const savedApiKey = localStorage.getItem('inspireaiGeminiApiKey') || '';
-        apiKeyInput.value = savedApiKey;
-        apiKeyInput.addEventListener('change', () => {
-            localStorage.setItem('inspireaiGeminiApiKey', apiKeyInput.value.trim());
+        fields.apiKey.value = savedApiKey;
+        fields.apiKey.addEventListener('change', () => {
+            localStorage.setItem('inspireaiGeminiApiKey', fields.apiKey.value.trim());
             showNotification('บันทึก API key แล้ว');
         });
 
-        // Utility functions
-        function showLoading() {
-            loadingDiv.classList.remove('hidden');
-            placeholderDiv.classList.add('hidden');
-            generatedContentDiv.classList.add('hidden');
-            disableButtons(true);
-        }
-
-        function hideLoading() {
-            loadingDiv.classList.add('hidden');
-        }
-
-        function showResult(title, contentHtml, imageUrls = []) {
-            generatedContentDiv.classList.remove('hidden');
-            generatedContentDiv.classList.add('fade-in');
-            resultTitle.textContent = title;
-            textContent.innerHTML = contentHtml;
-            imageGrid.innerHTML = '';
-
-            if (imageUrls.length > 0) {
-                textContent.classList.add('hidden');
-                imageGrid.classList.remove('hidden');
-                copyAllBtn.classList.add('hidden');
-                downloadAllBtn.classList.remove('hidden');
-                imageUrls.forEach(url => {
-                    const imgContainer = document.createElement('div');
-                    imgContainer.className = 'relative group aspect-square';
-                    const img = document.createElement('img');
-                    img.src = url;
-                    img.className = 'w-full h-full object-cover rounded-lg shadow-md transition-transform transform group-hover:scale-105';
-                    img.onerror = () => img.src = 'https://placehold.co/512x512/111827/4a5568?text=Error';
-
-                    const downloadBtn = document.createElement('button');
-                    downloadBtn.innerHTML = `
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                    `;
-                    downloadBtn.className = 'absolute bottom-2 right-2 bg-black/50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity';
-                    downloadBtn.onclick = (e) => {
-                        e.stopPropagation();
-                        downloadFile(url, `inspireai-image-${Date.now()}.png`);
-                    };
-
-                    imgContainer.appendChild(img);
-                    imgContainer.appendChild(downloadBtn);
-                    imageGrid.appendChild(imgContainer);
-                });
-            } else {
-                textContent.classList.remove('hidden');
-                imageGrid.classList.add('hidden');
-                copyAllBtn.classList.remove('hidden');
-                downloadAllBtn.classList.add('hidden');
-            }
-            disableButtons(false);
-        }
-
-        function disableButtons(disabled) {
-            generateScriptBtn.disabled = disabled;
-            generateVoiceBtn.disabled = disabled;
-            generateImageBtn.disabled = disabled;
-            [generateScriptBtn, generateVoiceBtn, generateImageBtn].forEach(btn => {
-                if (disabled) {
-                    btn.classList.add('opacity-50', 'cursor-not-allowed');
-                    btn.querySelector('.button-text').textContent = 'กำลังสร้าง...';
-                } else {
-                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
-                }
-            });
-            // Reset text after a short delay
-            if (!disabled) {
-                setTimeout(() => {
-                    generateScriptBtn.querySelector('.button-text').textContent = 'สร้างไอเดียสคริปต์';
-                    generateVoiceBtn.querySelector('.button-text').textContent = 'สร้างไอเดียเสียงพากย์';
-                    generateImageBtn.querySelector('.button-text').textContent = 'สร้างไอเดียภาพ';
-                }, 100);
-            }
-        }
-
         function showNotification(message, isError = false) {
             notification.textContent = message;
-            notification.className = `fixed bottom-5 right-5 text-white py-2 px-4 rounded-lg shadow-lg opacity-100 transform -translate-y-5 ${isError ? 'bg-red-500' : 'bg-green-500'}`;
+            notification.className = `fixed bottom-5 right-5 z-50 rounded-lg px-4 py-2 text-sm font-semibold text-white opacity-100 shadow-lg transform translate-y-0 ${isError ? 'bg-rose-500' : 'bg-emerald-500'}`;
             setTimeout(() => {
-                notification.className = notification.className.replace('opacity-100 -translate-y-5', 'opacity-0 translate-y-10');
-            }, 3000);
+                notification.className = notification.className.replace('opacity-100 translate-y-0', 'opacity-0 translate-y-4');
+            }, 2600);
         }
 
-        async function callGenerativeApi(prompt) {
-             if (!topicInput.value.trim()) {
-                showNotification("กรุณาใส่หัวข้อหลักก่อนครับ", true);
-                return null;
-            }
-            const apiKey = apiKeyInput.value.trim();
-            if (!apiKey) {
-                showNotification("กรุณาใส่ Gemini API Key ก่อนใช้งาน AI", true);
-                showResult("ต้องใส่ API Key ก่อน", `<p>กรุณาวาง Gemini API Key ในช่องด้านบน แล้วลองกดสร้างอีกครั้ง</p>`);
-                return null;
-            }
-            showLoading();
-            try {
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
-                const payload = {
-                    contents: [{ parts: [{ text: prompt }] }],
-                };
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
-                const result = await response.json();
-                return result.candidates?.[0]?.content?.parts?.[0]?.text;
-            } catch (error) {
-                console.error("API call failed:", error);
-                showNotification("เกิดข้อผิดพลาดในการเรียก AI", true);
-                showResult("เกิดข้อผิดพลาด", `<p>ไม่สามารถสร้างผลลัพธ์ได้ในขณะนี้ โปรดลองใหม่อีกครั้ง</p><p class="text-xs text-gray-500 mt-2">Error: ${error.message}</p>`);
-                return null;
-            } finally {
-                hideLoading();
-                disableButtons(false);
-            }
+        function getBrief() {
+            return Object.fromEntries(Object.entries(fields).map(([key, input]) => [key, input.value.trim()]));
         }
 
-        async function downloadFile(url, filename) {
-             try {
-                const response = await fetch(url);
-                const blob = await response.blob();
-                saveAs(blob, filename);
-                showNotification(`ดาวน์โหลด ${filename} สำเร็จ!`);
-            } catch (error) {
-                console.error('Download error:', error);
-                showNotification(`เกิดข้อผิดพลาดในการดาวน์โหลด ${filename}`, true);
-            }
+        function validateBrief(brief) {
+            if (!brief.apiKey) return 'กรุณาใส่ Gemini API Key ก่อน';
+            if (!brief.brand) return 'กรุณาใส่ชื่อแบรนด์หรือโปรเจกต์';
+            if (!brief.offer) return 'กรุณาใส่สินค้า บริการ หรือหัวข้อหลัก';
+            if (!brief.audience) return 'กรุณาใส่กลุ่มเป้าหมาย';
+            return '';
         }
 
-
-        // Event Listeners
-        generateScriptBtn.addEventListener('click', async () => {
-            const topic = topicInput.value;
-            const prompt = `ในฐานะนักเขียนบทมืออาชีพ, จงสร้างไอเดียสคริปต์วิดีโอสั้น (Short video) สำหรับ TikTok/Reels/Shorts 3 ไอเดีย จากหัวข้อ "${topic}".
-                สำหรับแต่ละไอเดีย ให้ประกอบด้วย:
-                1. ชื่อคลิปที่ดึงดูด
-                2. โครงสร้างสคริปต์สั้นๆ แบ่งเป็น 3 ช่วง: Hook (เปิด), Value (เนื้อหา), CTA (ปิดท้าย)
-                3. แนวทางภาพและเสียงประกอบ
-
-                จัดรูปแบบผลลัพธ์เป็น HTML ที่สวยงาม ใช้ h3 สำหรับชื่อคลิป, p สำหรับเนื้อหา และ ul/li สำหรับรายการ`;
-
-            const resultText = await callGenerativeApi(prompt);
-            if (resultText) {
-                showResult(`ไอเดียสคริปต์สำหรับ '${topic}'`, resultText);
-            }
-        });
-
-        generateVoiceBtn.addEventListener('click', async () => {
-            const topic = topicInput.value;
-            const prompt = `ในฐานะ Creative Director, จงเขียนสคริปต์สำหรับเสียงพากย์ (Voice Over) 3 รูปแบบ สำหรับวิดีโอในหัวข้อ "${topic}".
-                แต่ละรูปแบบให้มี Mood & Tone ที่แตกต่างกัน เช่น:
-                1. สไตล์สนุกสนาน, เป็นกันเอง, เข้าถึงง่าย
-                2. สไตล์น่าเชื่อถือ, ให้ความรู้, เป็นทางการ
-                3. สไตล์สร้างแรงบันดาลใจ, ดึงดูดอารมณ์
-
-                สำหรับแต่ละรูปแบบ ให้ระบุ Mood & Tone และตามด้วยตัวอย่างสคริปต์ความยาวประมาณ 30-45 วินาที
-                จัดรูปแบบผลลัพธ์เป็น HTML ที่สวยงาม ใช้ h3 สำหรับชื่อสไตล์ และ p สำหรับสคริปต์`;
-
-            const resultText = await callGenerativeApi(prompt);
-            if (resultText) {
-                showResult(`ไอเดียเสียงพากย์สำหรับ '${topic}'`, resultText);
-            }
-        });
-
-        generateImageBtn.addEventListener('click', async () => {
-             const topic = topicInput.value;
-             const prompt = `ในฐานะ Art Director, จงอธิบายไอเดียภาพหรือ Key Visual สำหรับคอนเทนต์หัวข้อ "${topic}" จำนวน 4 ไอเดีย โดยแต่ละไอเดียให้บอกรายละเอียดเกี่ยวกับ:
-                1. Mood & Tone ของภาพ
-                2. องค์ประกอบในภาพ (Composition)
-                3. โทนสี (Color Palette)
-
-                จากนั้นให้สร้าง Prompt สำหรับ AI Image Generator (เช่น Midjourney, DALL-E) ที่สอดคล้องกับแต่ละไอเดีย
-
-                จัดรูปแบบผลลัพธ์เป็น HTML ที่สวยงาม ใช้ h3 สำหรับชื่อไอเดีย, p สำหรับคำอธิบาย และ code block สำหรับ Prompt ของ AI`;
-
-            const textResult = await callGenerativeApi(prompt);
-            if (textResult) {
-                // This is a simplified approach. A real app would use an image generation API.
-                // Here we simulate getting image URLs based on the topic.
-                const keywords = topic.split(' ').join('+');
-                const imageUrls = Array.from({length: 4}, (_, i) => `https://source.unsplash.com/512x512/?${keywords}&sig=${i}${Date.now()}`);
-                showResult(`ไอเดียภาพสำหรับ '${topic}'`, textResult, imageUrls);
-            }
-        });
-
-        copyAllBtn.addEventListener('click', () => {
-            const textToCopy = textContent.innerText;
-             navigator.clipboard.writeText(textToCopy).then(() => {
-                showNotification('คัดลอกเนื้อหาทั้งหมดสำเร็จ!');
-            }, (err) => {
-                console.error('Async: Could not copy text: ', err);
-                showNotification('ไม่สามารถคัดลอกได้', true);
+        function setLoading(isLoading) {
+            loading.classList.toggle('hidden', !isLoading);
+            loading.classList.toggle('flex', isLoading);
+            placeholder.classList.add('hidden');
+            result.classList.toggle('hidden', isLoading);
+            generateButtons.forEach((button) => {
+                button.disabled = isLoading;
+                button.classList.toggle('opacity-60', isLoading);
+                button.classList.toggle('cursor-not-allowed', isLoading);
             });
-        });
+        }
 
-        downloadAllBtn.addEventListener('click', async () => {
-             const allImages = Array.from(imageGrid.querySelectorAll('img'));
-             if(allImages.length === 0) return;
-             showNotification(`กำลังดาวน์โหลดทั้งหมด ${allImages.length} ภาพ...`);
-             for (let i = 0; i < allImages.length; i++) {
-                await downloadFile(allImages[i].src, `inspireai-image-${i + 1}.png`);
+        function escapeHtml(value) {
+            return value.replace(/[&<>"']/g, (char) => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            }[char]));
+        }
+
+        function renderMarkdown(markdown) {
+            const escaped = escapeHtml(markdown);
+            const lines = escaped.split('\n');
+            let html = '';
+            let listOpen = false;
+
+            lines.forEach((line) => {
+                const trimmed = line.trim();
+                if (!trimmed) {
+                    if (listOpen) {
+                        html += '</ul>';
+                        listOpen = false;
+                    }
+                    html += '<br>';
+                    return;
+                }
+                if (trimmed.startsWith('### ')) {
+                    if (listOpen) html += '</ul>';
+                    listOpen = false;
+                    html += `<h3>${trimmed.slice(4)}</h3>`;
+                    return;
+                }
+                if (trimmed.startsWith('## ')) {
+                    if (listOpen) html += '</ul>';
+                    listOpen = false;
+                    html += `<h2>${trimmed.slice(3)}</h2>`;
+                    return;
+                }
+                if (/^[-*]\s+/.test(trimmed)) {
+                    if (!listOpen) {
+                        html += '<ul>';
+                        listOpen = true;
+                    }
+                    html += `<li>${trimmed.replace(/^[-*]\s+/, '')}</li>`;
+                    return;
+                }
+                if (listOpen) {
+                    html += '</ul>';
+                    listOpen = false;
+                }
+                html += `<p>${trimmed.replace(/`([^`]+)`/g, '<code>$1</code>')}</p>`;
+            });
+
+            if (listOpen) html += '</ul>';
+            return html;
+        }
+
+        function buildPrompt(mode, brief) {
+            const base = `
+คุณคือ senior content strategist สำหรับตลาดไทย
+ตอบเป็นภาษาไทย กระชับ ใช้งานจริง และจัดรูปแบบเป็น Markdown เท่านั้น
+ห้ามใส่คำอธิบายว่าคุณเป็น AI
+
+ข้อมูล brief:
+- แบรนด์/โปรเจกต์: ${brief.brand}
+- สินค้า/บริการ/หัวข้อหลัก: ${brief.offer}
+- กลุ่มเป้าหมาย: ${brief.audience}
+- เป้าหมาย: ${brief.goal}
+- ช่องทางหลัก: ${brief.platform}
+- น้ำเสียงแบรนด์: ${brief.tone}
+- ระยะเวลาแผน: ${brief.duration}
+- ข้อจำกัด/สิ่งที่อยากเน้น: ${brief.notes || 'ไม่มี'}
+`;
+
+            const modes = {
+                campaign: `
+สร้าง Content Campaign Plan ที่พร้อมนำไปทำงานต่อ โดยมีหัวข้อ:
+## Strategy Snapshot
+- positioning หนึ่งประโยค
+- message หลัก 3 ข้อ
+- angle ที่ควรใช้และควรเลี่ยง
+## Content Calendar
+ทำเป็นรายการรายวันสำหรับ ${brief.duration} โดยแต่ละวันมี Day, Content Pillar, Hook, Format, Caption Direction, CTA
+## Production Notes
+- shot/asset ที่ต้องเตรียม
+- วิธีวัดผล
+- next action หลังโพสต์
+`,
+                video: `
+สร้างชุด Short Video จำนวน 5 คลิป โดยแต่ละคลิปมี:
+## Video Concepts
+### คลิปที่ X: ชื่อคลิป
+- Hook 3 วินาทีแรก
+- Script แบบแบ่งฉาก 4-6 beat
+- Visual direction
+- Voice over
+- On-screen text
+- CTA
+## Thumbnail Text
+เสนอข้อความหน้าปก 8 แบบ
+`,
+                repurpose: `
+แตก brief เป็นชุดโพสต์พร้อมใช้:
+## Repurpose Kit
+- Caption สั้น 5 แบบ
+- Caption เล่าเรื่อง 3 แบบ
+- Hook เปิดโพสต์ 12 แบบ
+- CTA 8 แบบ
+- LINE OA broadcast 2 แบบ
+- LinkedIn/Facebook long post 1 แบบ
+## Editing Pass
+สรุปวิธีปรับให้เป็นทางการขึ้น เป็นกันเองขึ้น และขายน้อยลง
+`
+            };
+
+            return `${base}\n${modes[mode]}`;
+        }
+
+        async function callGemini(prompt, apiKey) {
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }],
+                    generationConfig: {
+                        temperature: 0.75,
+                        topP: 0.9
+                    }
+                })
+            });
+
+            if (!response.ok) {
+                const detail = await response.text();
+                throw new Error(`API Error ${response.status}: ${detail.slice(0, 180)}`);
             }
+
+            const data = await response.json();
+            return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        }
+
+        async function generate(mode) {
+            const brief = getBrief();
+            const validationError = validateBrief(brief);
+            if (validationError) {
+                showNotification(validationError, true);
+                return;
+            }
+
+            localStorage.setItem('inspireaiGeminiApiKey', brief.apiKey);
+            setLoading(true);
+            copyBtn.classList.add('hidden');
+            downloadBtn.classList.add('hidden');
+
+            try {
+                const markdown = await callGemini(buildPrompt(mode, brief), brief.apiKey);
+                latestMarkdown = markdown || 'ไม่พบผลลัพธ์จาก Gemini';
+                resultTitle.textContent = mode === 'campaign' ? 'Content Campaign Plan' : mode === 'video' ? 'Short Video Studio' : 'Repurpose Kit';
+                resultMeta.textContent = `${brief.brand} • ${brief.platform} • ${brief.duration}`;
+                result.innerHTML = renderMarkdown(latestMarkdown);
+                result.classList.remove('hidden');
+                result.classList.add('fade-in');
+                copyBtn.classList.remove('hidden');
+                copyBtn.classList.add('flex');
+                downloadBtn.classList.remove('hidden');
+                downloadBtn.classList.add('flex');
+                showNotification('สร้างผลลัพธ์สำเร็จ');
+            } catch (error) {
+                latestMarkdown = '';
+                resultTitle.textContent = 'เกิดข้อผิดพลาด';
+                resultMeta.textContent = 'ตรวจ API key หรือ quota แล้วลองอีกครั้ง';
+                result.innerHTML = `<p>${escapeHtml(error.message)}</p>`;
+                result.classList.remove('hidden');
+                showNotification('เรียก Gemini ไม่สำเร็จ', true);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        generateButtons.forEach((button) => {
+            button.addEventListener('click', () => generate(button.dataset.mode));
         });
 
-    </script>
-    <!-- PWA additions -->
-    <script>
+        copyBtn.addEventListener('click', async () => {
+            if (!latestMarkdown) return;
+            await navigator.clipboard.writeText(latestMarkdown);
+            showNotification('คัดลอกแล้ว');
+        });
+
+        downloadBtn.addEventListener('click', () => {
+            if (!latestMarkdown) return;
+            const blob = new Blob([latestMarkdown], { type: 'text/markdown;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `inspireai-content-plan-${Date.now()}.md`;
+            link.click();
+            URL.revokeObjectURL(url);
+            showNotification('ดาวน์โหลดแล้ว');
+        });
+
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').then(registration => {
-                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
-                }, err => {
-                    console.log('ServiceWorker registration failed: ', err);
+                navigator.serviceWorker.register('sw.js').catch((error) => {
+                    console.log('ServiceWorker registration failed:', error);
                 });
             });
         }
+
+        lucide.createIcons();
     </script>
-    <!-- End PWA additions -->
 </body>
 </html>
