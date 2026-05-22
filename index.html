@@ -287,6 +287,10 @@
                         <i data-lucide="flask-conical" class="h-5 w-5"></i>
                         Hook Lab + ให้คะแนน
                     </button>
+                    <button data-mode="assetCampaign" class="generateBtn flex items-center justify-center gap-2 rounded-lg border border-emerald-500/60 bg-emerald-400/10 px-4 py-3 font-bold text-emerald-100 transition hover:border-emerald-300 hover:bg-emerald-400/20">
+                        <i data-lucide="image-plus" class="h-5 w-5"></i>
+                        Asset-to-Campaign
+                    </button>
                     <button id="compareBtn" class="flex items-center justify-center gap-2 rounded-lg border border-cyan-500/60 bg-cyan-400/10 px-4 py-3 font-bold text-cyan-100 transition hover:border-cyan-300 hover:bg-cyan-400/20">
                         <i data-lucide="columns-2" class="h-5 w-5"></i>
                         Compare แผนคอนเทนต์
@@ -658,7 +662,14 @@
         }
 
         function getModeTitle(mode) {
-            return mode === 'campaign' ? 'Content Campaign Plan' : mode === 'video' ? 'Short Video Studio' : mode === 'repurpose' ? 'Repurpose Kit' : 'Hook Lab';
+            const titles = {
+                campaign: 'Content Campaign Plan',
+                video: 'Short Video Studio',
+                repurpose: 'Repurpose Kit',
+                hooklab: 'Hook Lab',
+                assetCampaign: 'Asset-to-Campaign'
+            };
+            return titles[mode] || 'Content Campaign Plan';
         }
 
         function formatDateTime(value) {
@@ -930,6 +941,36 @@
 เลือก hook ที่ดีที่สุด 5 อัน พร้อมเหตุผลและวิธีถ่าย/เขียนโพสต์ให้ hook นั้นทำงาน
 ## A/B Test Plan
 เสนอวิธีทดสอบ 3 รอบ พร้อม metric ที่ควรดู
+`,
+                assetCampaign: `
+สร้าง Asset-to-Campaign โดยใช้ภาพสินค้าที่แนบเป็นแกนหลัก ห้ามเดาสิ่งที่ไม่เห็นในภาพ ถ้าไม่แน่ใจให้บอกว่า "ควรเก็บข้อมูลเพิ่ม"
+
+ต้องมีหัวข้อ:
+## Visual Asset Audit
+- วิเคราะห์แต่ละภาพที่แนบ: สิ่งที่เห็น, จุดเด่นสินค้า, mood, color, composition, visual hook, ข้อจำกัดของภาพ
+- เลือก hero asset ที่ควรใช้เป็นภาพหลัก พร้อมเหตุผล
+## Campaign Big Idea
+- campaign concept 1 แนวคิด
+- key message 3 แบบ
+- audience insight ที่โยงกับภาพ
+## Creative Angles
+- เสนอ 5 angle โดยแต่ละ angle ต้องบอกว่าใช้ภาพไหนเป็นหลัก, hook, format, CTA
+## Short Video Scripts
+- สคริปต์วิดีโอสั้น 3 คลิป แบ่งเป็น Hook, Scene-by-scene, Voice over, On-screen text, CTA
+## Caption Pack
+- caption สั้น 5 แบบ
+- caption เล่าเรื่อง 3 แบบ
+- caption ขายแบบนุ่ม 3 แบบ
+## Thumbnail / Cover Text
+- ข้อความหน้าปก 12 แบบ โดยต้องสัมพันธ์กับภาพที่แนบ
+## LINE OA Broadcast
+- ข้อความ broadcast 2 แบบ พร้อม CTA
+## Ad Copy
+- primary text 3 แบบ
+- headline 5 แบบ
+- description 3 แบบ
+## Production Checklist
+- สิ่งที่ควรถ่ายเพิ่ม 5 อย่างเพื่อให้ campaign แข็งแรงขึ้น
 `
             };
 
@@ -1027,6 +1068,10 @@
             const validationError = validateBrief(brief);
             if (validationError) {
                 showNotification(validationError, true);
+                return;
+            }
+            if (mode === 'assetCampaign' && (attachedImages.length < 3 || attachedImages.length > 5)) {
+                showNotification('Asset-to-Campaign ต้องแนบภาพสินค้า 3-5 รูป', true);
                 return;
             }
 

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'inspire-ai-cache-v9';
+const CACHE_NAME = 'inspire-ai-cache-v10';
 const urlsToCache = [
   './',
   'index.html',
