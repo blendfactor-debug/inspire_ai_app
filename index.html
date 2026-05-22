@@ -106,6 +106,19 @@
                     </div>
 
                     <div>
+                        <label for="businessType" class="mb-1.5 block text-sm font-semibold text-slate-300">ประเภทธุรกิจ / Creator Niche</label>
+                        <select id="businessType" class="field w-full px-3 py-2.5">
+                            <option value="general">ทั่วไป</option>
+                            <option value="restaurant">ร้านอาหาร / คาเฟ่</option>
+                            <option value="clinic">คลินิก / สุขภาพ / ความงาม</option>
+                            <option value="course">คอร์สออนไลน์ / โค้ช / ที่ปรึกษา</option>
+                            <option value="realestate">อสังหา / โครงการ / นายหน้า</option>
+                            <option value="personalbrand">Personal Brand / Creator</option>
+                            <option value="ecommerce">สินค้าออนไลน์ / E-commerce</option>
+                        </select>
+                    </div>
+
+                    <div>
                         <label for="offer" class="mb-1.5 block text-sm font-semibold text-slate-300">สินค้า / บริการ / หัวข้อหลัก</label>
                         <textarea id="offer" rows="3" class="field w-full resize-none px-3 py-2.5" placeholder="สิ่งที่อยากโปรโมต จุดเด่น ราคา หรือปัญหาที่ช่วยแก้"></textarea>
                     </div>
@@ -113,6 +126,11 @@
                     <div>
                         <label for="audience" class="mb-1.5 block text-sm font-semibold text-slate-300">กลุ่มเป้าหมาย</label>
                         <input id="audience" class="field w-full px-3 py-2.5" placeholder="เช่น เจ้าของธุรกิจเล็ก, คนเริ่มออกกำลังกาย, Gen Z">
+                    </div>
+
+                    <div>
+                        <label for="proof" class="mb-1.5 block text-sm font-semibold text-slate-300">จุดพิสูจน์ / ความน่าเชื่อถือ</label>
+                        <textarea id="proof" rows="2" class="field w-full resize-none px-3 py-2.5" placeholder="เช่น รีวิวลูกค้า, ผลลัพธ์, ประสบการณ์, ก่อน-หลัง, ตัวเลข"></textarea>
                     </div>
 
                     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -163,6 +181,17 @@
                         <label for="notes" class="mb-1.5 block text-sm font-semibold text-slate-300">ข้อจำกัด / สิ่งที่อยากเน้น</label>
                         <textarea id="notes" rows="3" class="field w-full resize-none px-3 py-2.5" placeholder="เช่น ห้ามขายตรงเกินไป, ต้องมี CTA ให้ทักแชต, ใช้ภาษาไทยง่าย ๆ"></textarea>
                     </div>
+
+                    <div>
+                        <label for="avoidWords" class="mb-1.5 block text-sm font-semibold text-slate-300">คำต้องห้าม / สไตล์ที่ไม่ต้องการ</label>
+                        <textarea id="avoidWords" rows="2" class="field w-full resize-none px-3 py-2.5" placeholder="เช่น ห้ามเว่อร์, ไม่ใช้คำว่า ปัง/สุดคุ้ม, ไม่พูดเหมือน AI"></textarea>
+                    </div>
+                </div>
+
+                <div class="mt-5 grid grid-cols-3 gap-2">
+                    <button id="saveMemoryBtn" class="rounded-lg border border-slate-700 px-3 py-2 text-sm font-semibold text-slate-200 transition hover:border-cyan-300 hover:text-cyan-100">บันทึกแบรนด์</button>
+                    <button id="loadMemoryBtn" class="rounded-lg border border-slate-700 px-3 py-2 text-sm font-semibold text-slate-200 transition hover:border-emerald-300 hover:text-emerald-100">โหลด</button>
+                    <button id="clearMemoryBtn" class="rounded-lg border border-slate-700 px-3 py-2 text-sm font-semibold text-slate-200 transition hover:border-rose-300 hover:text-rose-100">ล้าง</button>
                 </div>
 
                 <div class="mt-5 grid gap-2">
@@ -180,6 +209,10 @@
                             แตกเป็นโพสต์
                         </button>
                     </div>
+                    <button data-mode="hooklab" class="generateBtn flex items-center justify-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-4 py-3 font-semibold text-slate-100 transition hover:border-violet-300 hover:text-violet-100">
+                        <i data-lucide="flask-conical" class="h-5 w-5"></i>
+                        Hook Lab + ให้คะแนน
+                    </button>
                 </div>
             </section>
 
@@ -232,16 +265,22 @@
         const fields = {
             apiKey: document.getElementById('apiKey'),
             brand: document.getElementById('brand'),
+            businessType: document.getElementById('businessType'),
             offer: document.getElementById('offer'),
             audience: document.getElementById('audience'),
+            proof: document.getElementById('proof'),
             goal: document.getElementById('goal'),
             platform: document.getElementById('platform'),
             tone: document.getElementById('tone'),
             duration: document.getElementById('duration'),
-            notes: document.getElementById('notes')
+            notes: document.getElementById('notes'),
+            avoidWords: document.getElementById('avoidWords')
         };
 
         const generateButtons = Array.from(document.querySelectorAll('.generateBtn'));
+        const saveMemoryBtn = document.getElementById('saveMemoryBtn');
+        const loadMemoryBtn = document.getElementById('loadMemoryBtn');
+        const clearMemoryBtn = document.getElementById('clearMemoryBtn');
         const loading = document.getElementById('loading');
         const placeholder = document.getElementById('placeholder');
         const result = document.getElementById('result');
@@ -252,12 +291,90 @@
         const notification = document.getElementById('notification');
         let latestMarkdown = '';
 
+        const memoryKey = 'inspireaiBrandMemory';
+        const businessPresets = {
+            general: {
+                note: 'ใช้ insight จาก pain point, proof, offer และ objection ของลูกค้า',
+                avoid: 'ไม่ใช้ภาษากว้าง ๆ แบบคอนเทนต์ทั่วไป'
+            },
+            restaurant: {
+                note: 'เน้นเมนูเด่น บรรยากาศ ช่วงเวลาที่ควรมา location cue รีวิวลูกค้า และเหตุผลที่ต้องมาวันนี้',
+                avoid: 'ไม่เขียนเหมือนรีวิวร้านอาหารทั่วไป ห้ามใช้คำเว่อร์โดยไม่มีภาพหรือ proof รองรับ'
+            },
+            clinic: {
+                note: 'เน้นความน่าเชื่อถือ ขั้นตอน ความปลอดภัย expectation ที่ถูกต้อง และ social proof แบบไม่เคลมเกินจริง',
+                avoid: 'ห้ามสัญญาผลลัพธ์เกินจริง ห้ามใช้ถ้อยคำทางการแพทย์ที่เสี่ยง misleading'
+            },
+            course: {
+                note: 'เน้น transformation ของผู้เรียน pain point ก่อนเรียน framework ที่สอน และ quick win ที่พิสูจน์ความเชี่ยวชาญ',
+                avoid: 'ไม่ขายฝัน ไม่พูดรวยเร็ว ไม่ใช้คำโค้ชชิ่งลอย ๆ'
+            },
+            realestate: {
+                note: 'เน้นทำเล lifestyle การเดินทาง ราคาเทียบคุณค่า objection ของผู้ซื้อ และ checklist ก่อนตัดสินใจ',
+                avoid: 'ไม่พูดว่าโอกาสสุดท้ายถ้าไม่มีข้อมูลรองรับ ไม่ใช้คำขายแข็งเกินไป'
+            },
+            personalbrand: {
+                note: 'เน้น point of view ประสบการณ์จริง story ส่วนตัว lesson learned และความเห็นที่มีมุมเฉพาะ',
+                avoid: 'ไม่ทำให้เสียงแบรนด์ดูเป็น corporate หรือเหมือนโพสต์ AI'
+            },
+            ecommerce: {
+                note: 'เน้น problem-solution demo ก่อนหลัง user generated content objection handling และเหตุผลที่ควรซื้อจากร้านนี้',
+                avoid: 'ไม่ลดราคาเป็นแกนหลักทุกโพสต์ ไม่ใช้คำโฆษณาซ้ำ ๆ'
+            }
+        };
+
         const savedApiKey = localStorage.getItem('inspireaiGeminiApiKey') || '';
         fields.apiKey.value = savedApiKey;
         fields.apiKey.addEventListener('change', () => {
             localStorage.setItem('inspireaiGeminiApiKey', fields.apiKey.value.trim());
             showNotification('บันทึก API key แล้ว');
         });
+
+        fields.businessType.addEventListener('change', () => {
+            const preset = businessPresets[fields.businessType.value];
+            if (!preset) return;
+            if (!fields.notes.value.trim()) fields.notes.value = preset.note;
+            if (!fields.avoidWords.value.trim()) fields.avoidWords.value = preset.avoid;
+            showNotification('ใส่ preset ให้แล้ว');
+        });
+
+        function getMemoryFields() {
+            const { apiKey, ...brandFields } = fields;
+            return brandFields;
+        }
+
+        function saveBrandMemory() {
+            const memory = Object.fromEntries(Object.entries(getMemoryFields()).map(([key, input]) => [key, input.value.trim()]));
+            localStorage.setItem(memoryKey, JSON.stringify(memory));
+            showNotification('บันทึก Brand Memory แล้ว');
+        }
+
+        function persistBrandMemory() {
+            const memory = Object.fromEntries(Object.entries(getMemoryFields()).map(([key, input]) => [key, input.value.trim()]));
+            localStorage.setItem(memoryKey, JSON.stringify(memory));
+        }
+
+        function loadBrandMemory(silent = false) {
+            const raw = localStorage.getItem(memoryKey);
+            if (!raw) {
+                if (!silent) showNotification('ยังไม่มี Brand Memory ที่บันทึกไว้', true);
+                return;
+            }
+            const memory = JSON.parse(raw);
+            Object.entries(getMemoryFields()).forEach(([key, input]) => {
+                if (memory[key] !== undefined) input.value = memory[key];
+            });
+            if (!silent) showNotification('โหลด Brand Memory แล้ว');
+        }
+
+        function clearBrandMemory() {
+            localStorage.removeItem(memoryKey);
+            showNotification('ล้าง Brand Memory แล้ว');
+        }
+
+        saveMemoryBtn.addEventListener('click', saveBrandMemory);
+        loadMemoryBtn.addEventListener('click', loadBrandMemory);
+        clearMemoryBtn.addEventListener('click', clearBrandMemory);
 
         function showNotification(message, isError = false) {
             notification.textContent = message;
@@ -356,13 +473,21 @@
 
 ข้อมูล brief:
 - แบรนด์/โปรเจกต์: ${brief.brand}
+- ประเภทธุรกิจ/Creator Niche: ${fields.businessType.options[fields.businessType.selectedIndex].text}
 - สินค้า/บริการ/หัวข้อหลัก: ${brief.offer}
 - กลุ่มเป้าหมาย: ${brief.audience}
+- จุดพิสูจน์/ความน่าเชื่อถือ: ${brief.proof || 'ยังไม่มี ให้เสนอ proof ที่ควรเก็บเพิ่ม'}
 - เป้าหมาย: ${brief.goal}
 - ช่องทางหลัก: ${brief.platform}
 - น้ำเสียงแบรนด์: ${brief.tone}
 - ระยะเวลาแผน: ${brief.duration}
 - ข้อจำกัด/สิ่งที่อยากเน้น: ${brief.notes || 'ไม่มี'}
+- คำต้องห้าม/สไตล์ที่ไม่ต้องการ: ${brief.avoidWords || 'ไม่มี'}
+
+ข้อบังคับเชิงคุณภาพ:
+- อย่าให้คำตอบเหมือน template ทั่วไป ต้องโยงกับประเภทธุรกิจ กลุ่มเป้าหมาย และ proof
+- ทุก output ต้องมีเหตุผลทางการตลาดที่นำไปตัดสินใจต่อได้
+- เขียนแบบนักการตลาดไทยที่เข้าใจพฤติกรรมผู้ใช้โซเชียล ไม่ใช้ภาษาทางการเกินไป
 `;
 
             const modes = {
@@ -403,6 +528,20 @@
 - LinkedIn/Facebook long post 1 แบบ
 ## Editing Pass
 สรุปวิธีปรับให้เป็นทางการขึ้น เป็นกันเองขึ้น และขายน้อยลง
+`,
+                hooklab: `
+สร้าง Hook Lab สำหรับทดสอบคอนเทนต์ โดยมีหัวข้อ:
+## Hook Strategy
+- สรุป psychological angle ที่ควรใช้ 5 แบบ
+- objection หลักที่ hook ต้องช่วยแก้
+## Hook Scoreboard
+สร้าง hook 30 อัน แบ่งเป็น Problem, Curiosity, Contrarian, Proof, Story, Offer
+แต่ละ hook ต้องมีคะแนน 1-10 ใน 4 มิติ: Clarity, Curiosity, Emotional Pull, Sales Intent
+ให้เขียนเป็นรายการ ไม่ต้องทำตาราง
+## Top 5 Picks
+เลือก hook ที่ดีที่สุด 5 อัน พร้อมเหตุผลและวิธีถ่าย/เขียนโพสต์ให้ hook นั้นทำงาน
+## A/B Test Plan
+เสนอวิธีทดสอบ 3 รอบ พร้อม metric ที่ควรดู
 `
             };
 
@@ -441,6 +580,7 @@
             }
 
             localStorage.setItem('inspireaiGeminiApiKey', brief.apiKey);
+            persistBrandMemory();
             setLoading(true);
             copyBtn.classList.add('hidden');
             downloadBtn.classList.add('hidden');
@@ -448,7 +588,7 @@
             try {
                 const markdown = await callGemini(buildPrompt(mode, brief), brief.apiKey);
                 latestMarkdown = markdown || 'ไม่พบผลลัพธ์จาก Gemini';
-                resultTitle.textContent = mode === 'campaign' ? 'Content Campaign Plan' : mode === 'video' ? 'Short Video Studio' : 'Repurpose Kit';
+                resultTitle.textContent = mode === 'campaign' ? 'Content Campaign Plan' : mode === 'video' ? 'Short Video Studio' : mode === 'repurpose' ? 'Repurpose Kit' : 'Hook Lab';
                 resultMeta.textContent = `${brief.brand} • ${brief.platform} • ${brief.duration}`;
                 result.innerHTML = renderMarkdown(latestMarkdown);
                 result.classList.remove('hidden');
@@ -500,6 +640,7 @@
             });
         }
 
+        loadBrandMemory(true);
         lucide.createIcons();
     </script>
 </body>
